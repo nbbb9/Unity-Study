@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class UIPopupController : MonoBehaviour {
-    public GameObject selectObject;// 팝업으로 띄울 패널(파일명이 같아야함함)
+    public GameObject selectObject;// 팝업으로 띄울 패널(파일명이 같아야함)
 
     private bool isPopupOpen = false;// 팝업 열림 여부
 
