@@ -2,15 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CreateObject : MonoBehaviour {
-    public GameObject selectObject;
-    public Material previewMaterial;// 설치 전 Material
     private GameObject previewObject;// 팝업에서 선택한 Object
     private bool isPlacing = false;// 설치 여부
     private PrimitiveType currentType;// 현재 Object 타입
-
-    public bool IsPlacing() {
-        return isPlacing;
-    }
 
     /// <summary>
     /// 정육면체 생성
@@ -26,20 +20,17 @@ public class CreateObject : MonoBehaviour {
     }
 
     /// <summary>
-    /// 
+    /// 타입에 맞는 오브젝트 생성 메서드
     /// </summary>
     /// <param name="type"></param>
     void StartPlacing(PrimitiveType type) {
         if (previewObject != null) {
-            Destroy(previewObject);//만약 이미 선택한 Object가 있다면 제거
+            Destroy(previewObject);// 만약 이미 선택한 Object가 있다면 제거
         }
 
-        // if (selectObject == null) {
-        //     selectObject = GameObject.Find("SelectObject");
-        // }
+        currentType = type;// 위치 확정 전 보일 타입을 지정
 
-        currentType = type;
-        previewObject = GameObject.CreatePrimitive(type);
+        previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
         previewObject.GetComponent<Collider>().enabled = false;
 
         // 투명한 붉은색 머티리얼 생성 및 적용
@@ -50,11 +41,11 @@ public class CreateObject : MonoBehaviour {
                 Material redTransparentMat = new Material(urpShader);
 
                 // 1. 색상 (불투명도 0.5)
-                redTransparentMat.color = new Color(1f, 0f, 0f, 0.5f); // 붉은색 + 투명도
+                redTransparentMat.color = new Color(1f, 0f, 0f, 0.5f);// 붉은색 + 투명도
 
                 // 2. URP용 투명 설정
-                redTransparentMat.SetFloat("_Surface", 1); // 0: Opaque, 1: Transparent
-                redTransparentMat.SetFloat("_Blend", 0);   // Alpha blending
+                redTransparentMat.SetFloat("_Surface", 1);// 0: Opaque, 1: Transparent
+                redTransparentMat.SetFloat("_Blend", 0);// Alpha blending
                 redTransparentMat.SetFloat("_ZWrite", 0);
                 redTransparentMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
                 redTransparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
@@ -71,32 +62,6 @@ public class CreateObject : MonoBehaviour {
         }
 
         isPlacing = true;
-    }
-
-    public void RestartPlacingFromObject(GameObject existingObject, PrimitiveType type) {
-        if (previewObject != null) {
-            Destroy(previewObject);
-        }
-
-        currentType = type;
-
-        previewObject = existingObject;
-        isPlacing = true;
-
-        // 충돌 방지를 위해 Collider 끔
-        Collider col = previewObject.GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        // 노란색 머티리얼 적용
-        Renderer rend = previewObject.GetComponent<Renderer>();
-        if (rend != null) {
-            Material yellowMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            yellowMat.color = new Color(1f, 1f, 0f, 0.4f); // 투명한 노란색
-            yellowMat.SetFloat("_Surface", 1); // Transparent
-            yellowMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            yellowMat.renderQueue = 3000;
-            rend.material = yellowMat;
-        }
     }
 
     void Update() {
@@ -124,7 +89,7 @@ public class CreateObject : MonoBehaviour {
 
             placed.name = currentType.ToString();
 
-            Destroy(previewObject);
+            Destroy(previewObject); 
             previewObject = null;
             isPlacing = false;
         }
