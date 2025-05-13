@@ -6,7 +6,11 @@ public class CreateObject : MonoBehaviour {
     public Material previewMaterial;// 설치 전 Material
     private GameObject previewObject;// 팝업에서 선택한 Object
     private bool isPlacing = false;// 설치 여부
-    private PrimitiveType currentType;// 
+    private PrimitiveType currentType;// 현재 Object 타입
+
+    public bool IsPlacing() {
+        return isPlacing;
+    }
 
     /// <summary>
     /// 정육면체 생성
@@ -30,29 +34,69 @@ public class CreateObject : MonoBehaviour {
             Destroy(previewObject);//만약 이미 선택한 Object가 있다면 제거
         }
 
-        if (selectObject == null) {
-            selectObject = GameObject.Find("SelectObject");
-        }
+        // if (selectObject == null) {
+        //     selectObject = GameObject.Find("SelectObject");
+        // }
 
         currentType = type;
         previewObject = GameObject.CreatePrimitive(type);
         previewObject.GetComponent<Collider>().enabled = false;
 
-        // 머티리얼을 투명하게 설정
-        if (previewMaterial != null) {
-            Renderer rend = previewObject.GetComponent<Renderer>();
-            if (rend != null) {
-                Material matCopy = new Material(previewMaterial);// 복사본 생성
+        // 투명한 붉은색 머티리얼 생성 및 적용
+        Renderer rend = previewObject.GetComponent<Renderer>();
+        if (rend != null) {
+            Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
+            if (urpShader != null) {
+                Material redTransparentMat = new Material(urpShader);
 
-                rend.material = matCopy;
-                
-                Debug.Log("Material: " + previewObject.GetComponent<Renderer>().material.name + matCopy);
-                Debug.Log("Shader: " + previewObject.GetComponent<Renderer>().material.shader.name);
+                // 1. 색상 (불투명도 0.5)
+                redTransparentMat.color = new Color(1f, 0f, 0f, 0.5f); // 붉은색 + 투명도
+
+                // 2. URP용 투명 설정
+                redTransparentMat.SetFloat("_Surface", 1); // 0: Opaque, 1: Transparent
+                redTransparentMat.SetFloat("_Blend", 0);   // Alpha blending
+                redTransparentMat.SetFloat("_ZWrite", 0);
+                redTransparentMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                redTransparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+                // 3. 알파 프리멀티플 키워드 제거 (옵션)
+                redTransparentMat.DisableKeyword("_ALPHATEST_ON");
+                redTransparentMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                redTransparentMat.EnableKeyword("_ALPHABLEND_ON");
+
+                rend.material = redTransparentMat;
+            } else {
+                Debug.LogError("URP 셰이더를 찾을 수 없습니다.");
             }
-            
         }
 
         isPlacing = true;
+    }
+
+    public void RestartPlacingFromObject(GameObject existingObject, PrimitiveType type) {
+        if (previewObject != null) {
+            Destroy(previewObject);
+        }
+
+        currentType = type;
+
+        previewObject = existingObject;
+        isPlacing = true;
+
+        // 충돌 방지를 위해 Collider 끔
+        Collider col = previewObject.GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        // 노란색 머티리얼 적용
+        Renderer rend = previewObject.GetComponent<Renderer>();
+        if (rend != null) {
+            Material yellowMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            yellowMat.color = new Color(1f, 1f, 0f, 0.4f); // 투명한 노란색
+            yellowMat.SetFloat("_Surface", 1); // Transparent
+            yellowMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            yellowMat.renderQueue = 3000;
+            rend.material = yellowMat;
+        }
     }
 
     void Update() {
@@ -61,7 +105,6 @@ public class CreateObject : MonoBehaviour {
         // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
-
 
         if (Physics.Raycast(ray, out hit)) {
             Vector3 position = hit.point;
@@ -79,10 +122,13 @@ public class CreateObject : MonoBehaviour {
             placed.transform.position = previewObject.transform.position;
             placed.transform.rotation = previewObject.transform.rotation;
 
+            placed.name = currentType.ToString();
+
             Destroy(previewObject);
             previewObject = null;
             isPlacing = false;
         }
 
     }
+
 }
