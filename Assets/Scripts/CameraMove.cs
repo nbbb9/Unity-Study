@@ -14,7 +14,8 @@ public class CameraZoom : MonoBehaviour {
     private Vector3 lastMousePosition;// 이전 마우스 위치 저장
     private Vector3 initialPosition;// 초기 카메라 위치 저장
     private Quaternion initialRotation;// 초기 회전 저장
-    private float initialSize; // 초기 줌 크기 저장
+    private float initialSize;// 초기 줌 크기 저장
+    public Transform rotationTarget;// Plane 같은 회전 기준 오브젝트를 드래그해서 할당
 
     void Start() {
         // 해당 컴포넌트(코드 파일)를 붙인 오브젝트(카메라)에서 camera컴포넌트를 가져와 cam변수에 저장.
@@ -68,14 +69,15 @@ public class CameraZoom : MonoBehaviour {
     /// 회전 메서드(아직 이해 안됨.)
     /// </summary>
     void HandleRotate() {
-        if (Mouse.current.middleButton.isPressed) {// 마우스 휠을 클릭한 상태에서 마우스를 움직이면 실행됨.
+        if (Mouse.current.middleButton.isPressed && rotationTarget != null) {// 마우스 휠을 클릭한 상태에서 마우스를 움직이면 실행됨.
             Vector2 delta = Mouse.current.delta.ReadValue();// 현재 프레임에서 마우스가 얼마나 이동했는지를 얻는다.
             float rotX = delta.y * rotateSpeed * Time.deltaTime;
             float rotY = delta.x * rotateSpeed * Time.deltaTime;
 
             // x축 회전은 카메라의 오른쪽 축 기준, y축 회전은 월드 상 y축 기준
-            cam.transform.RotateAround(cam.transform.position, cam.transform.right, -rotX);
-            cam.transform.RotateAround(cam.transform.position, Vector3.up, rotY);
+            // 회전 기준을 Plane 등 오브젝트의 위치로 변경
+            cam.transform.RotateAround(rotationTarget.position, cam.transform.right, -rotX);
+            cam.transform.RotateAround(rotationTarget.position, Vector3.up, rotY);
         }
     }
 
