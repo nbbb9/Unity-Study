@@ -38,8 +38,7 @@ public class CameraZoom : MonoBehaviour {
     /// </summary>
     void HandleZoom() {
         float scroll = Mouse.current.scroll.ReadValue().y;// 현재 마우스 휠 입력값을 읽어들임. 위로 굴리면 +, 아래로 굴리면 -
-        if (scroll != 0f)
-        {
+        if (scroll != 0f) {
             cam.orthographicSize -= scroll * zoomSpeed * Time.deltaTime;// 카메라의 확대/축소 정도. Time.deltaTime을 곱함으로서 프레임 속도에 상관없이 일정한 속도로 움직임.
             cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minZoom, maxZoom);// 최소/최대 줌 값 사이로만 움직임.
         }

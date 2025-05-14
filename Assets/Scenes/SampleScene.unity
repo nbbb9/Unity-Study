@@ -487,6 +487,7 @@ MonoBehaviour:
   maxZoom: 15
   panSpeed: 10
   rotateSpeed: 20
+  rotationTarget: {fileID: 43516426}
 --- !u!1 &383119553
 GameObject:
   m_ObjectHideFlags: 0
@@ -1933,18 +1934,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1566205577}
-        m_TargetAssemblyTypeName: UIPopupController, Assembly-CSharp
-        m_MethodName: ClosePopup
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 491001162}
         m_TargetAssemblyTypeName: CreateObject, Assembly-CSharp
         m_MethodName: SpawnCube
