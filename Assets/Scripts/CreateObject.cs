@@ -65,6 +65,13 @@ public class CreateObject : MonoBehaviour {
     }
 
     void Update() {
+        FixObject();
+    }
+
+    /// <summary>
+    /// 마우스 좌클릭을 하면 해당 위치에 고정
+    /// </summary>
+    void FixObject() {
         if (!isPlacing || previewObject == null) return;
 
         // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
@@ -93,7 +100,6 @@ public class CreateObject : MonoBehaviour {
             previewObject = null;
             isPlacing = false;
         }
-
     }
 
 }
