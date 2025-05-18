@@ -1,11 +1,35 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class CreateObject : MonoBehaviour {
     private GameObject previewObject;// 팝업에서 선택한 Object
-    private bool isPlacing = false;// 설치 여부
+    public Material previewMaterial;// 설치전 보일 material(붉은색)
+    private bool isPlacing = false;// 설치중인지 여부
+    private GameObject selectedObject = null;// 
+    private bool isDragging = false;// 
     private PrimitiveType currentType;// 현재 Object 타입
     private GameObject lastHovered = null;
+    public GameObject infoPopup;
+    public Text nameText;
+    public Text typeText;
+
+    void Update() {
+        if (isPlacing && previewObject != null) {//만약 설치중이고 previewObject가 존재한다면
+            FixObject();
+        }
+        else{
+            DetectHoverAndSelect();
+
+            if (isDragging && selectedObject != null) {
+                DragSelectedObject();
+            }
+
+            if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging) {
+                EndDragging();
+            }
+        }
+    }
 
     /// <summary>
     /// 정육면체 생성
@@ -13,6 +37,7 @@ public class CreateObject : MonoBehaviour {
     public void SpawnCube() {
         SpawnObjects(PrimitiveType.Cube);
     }
+    
     /// <summary>
     /// 구 생성
     /// </summary>
@@ -29,47 +54,13 @@ public class CreateObject : MonoBehaviour {
             Destroy(previewObject);// 만약 이미 선택한 Object가 있다면 제거
         }
 
-        currentType = type;// 위치 확정 전 보일 타입을 지정
+        currentType = type;// 위치 확정 전 보일 타입을 지정(마우스를 따라다니면서 보일 타입 지정)
 
         previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
-        previewObject.GetComponent<Collider>().enabled = false;
+        previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
+        previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 법칙? 적용
 
-        // 투명한 붉은색 머티리얼 생성 및 적용
-        Renderer rend = previewObject.GetComponent<Renderer>();
-        if (rend != null) {
-            Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
-            if (urpShader != null) {
-                Material redTransparentMat = new Material(urpShader);
-
-                // 1. 색상 (불투명도 0.5)
-                redTransparentMat.color = new Color(1f, 0f, 0f, 0.5f);// 붉은색 + 투명도
-
-                // 2. URP용 투명 설정
-                redTransparentMat.SetFloat("_Surface", 1);// 0: Opaque, 1: Transparent
-                redTransparentMat.SetFloat("_Blend", 0);// Alpha blending
-                redTransparentMat.SetFloat("_ZWrite", 0);
-                redTransparentMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                redTransparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-
-                // 3. 알파 프리멀티플 키워드 제거 (옵션)
-                redTransparentMat.DisableKeyword("_ALPHATEST_ON");
-                redTransparentMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                redTransparentMat.EnableKeyword("_ALPHABLEND_ON");
-
-                rend.material = redTransparentMat;
-            } else {
-                Debug.LogError("URP 셰이더를 찾을 수 없습니다.");
-            }
-        }
-
-        isPlacing = true;
-    }
-
-    void Update() {
-        FixObject();
-        if (!isPlacing) {//설치되어 있다면
-            DetectHoverAndSelect();
-        }
+        isPlacing = true;//설치중으로 변경.
     }
 
     /// <summary>
@@ -97,20 +88,25 @@ public class CreateObject : MonoBehaviour {
             GameObject placed = GameObject.CreatePrimitive(currentType);
             placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f; // 살짝 띄워서 시작
             placed.transform.rotation = previewObject.transform.rotation;
-
             placed.name = currentType.ToString();
-
+            // 충돌한 평면을 부모로 설정
+            placed.transform.SetParent(hit.transform);
             // 중력을 적용할 수 있도록 Rigidbody 추가
             Rigidbody rb = placed.AddComponent<Rigidbody>();
             rb.useGravity = true;
             rb.constraints = RigidbodyConstraints.FreezeRotation; // 필요시 회전 제한
 
-            var selectable = placed.AddComponent<SelectableObject>();
+            var selectable = placed.AddComponent<SelectableObject>();// 선택 가능한 오브젝트로 생성.
             selectable.onReselect = (type, pos) => {
+                selectedObject = placed;// 선택된 오브젝트 등록
                 RePlacing(type, pos);// 오브젝트 이동
             };
+            selectable.infoPopup = infoPopup;
+            selectable.nameText = nameText;
+            selectable.typeText = typeText;
 
-            Destroy(previewObject); 
+            // 프리뷰 제거
+            Destroy(previewObject);
             previewObject = null;
             isPlacing = false;
         }
@@ -146,7 +142,8 @@ public class CreateObject : MonoBehaviour {
                     selected.OnSelect();
                 }
             }
-        } else {
+        }
+        else {
             // Ray에 아무것도 안 걸리면 hover 해제
             if (lastHovered != null) {
                 var lastSel = lastHovered.GetComponent<SelectableObject>();
@@ -158,45 +155,42 @@ public class CreateObject : MonoBehaviour {
     }
 
     /// <summary>
-    /// 설치된 Object선택 후 이동
+    /// 기존 오브젝트를 선택 후 이동을 위한 준비
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="startPosition"></param>
-    void RePlacing(PrimitiveType type, Vector3? startPosition = null) {
-        if (previewObject != null) {
-            Destroy(previewObject);//기존 오브젝트 제거
+    void RePlacing(PrimitiveType type, Vector3? startPosition = null)
+    {
+        isPlacing = false; // 새로 생성하지 않음
+        isDragging = true;
+        
+        // UI 정보 갱신
+        if (infoPopup != null && nameText != null && typeText != null && selectedObject != null) {
+            infoPopup.SetActive(true);
+            nameText.text = $"이름: {selectedObject.name}";
+            typeText.text = $"타입: {type}";
         }
+    }
+    
+    /// <summary>
+    /// 선택된 오브젝트를 마우스 위치로 이동
+    /// </summary>
+    void DragSelectedObject() {
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit hit;
 
-        currentType = type;
-        previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
-        previewObject.GetComponent<Collider>().enabled = false;
-
-        Renderer rend = previewObject.GetComponent<Renderer>();
-        if (rend != null) {
-            Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
-            if (urpShader != null) {
-                Material redTransparentMat = new Material(urpShader);
-                redTransparentMat.color = new Color(1f, 0f, 0f, 0.5f);
-                redTransparentMat.SetFloat("_Surface", 1);
-                redTransparentMat.SetFloat("_Blend", 0);
-                redTransparentMat.SetFloat("_ZWrite", 0);
-                redTransparentMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                redTransparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-                redTransparentMat.DisableKeyword("_ALPHATEST_ON");
-                redTransparentMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                redTransparentMat.EnableKeyword("_ALPHABLEND_ON");
-
-                rend.material = redTransparentMat;
-            } else {
-                Debug.LogError("URP 셰이더를 찾을 수 없습니다.");
-            }
+        if (Physics.Raycast(ray, out hit)) {
+            Vector3 position = hit.point;
+            float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;
+            position.y += objectHeight / 2f;
+            selectedObject.transform.position = position;
         }
+    }
 
-        if (startPosition.HasValue) {
-            previewObject.transform.position = startPosition.Value;
-        }
-
-        isPlacing = true;
+    /// <summary>
+    /// 드래그 끝낼 때 호출
+    /// </summary>
+    void EndDragging() {
+        isDragging = false;
+        selectedObject = null;
     }
 
 }

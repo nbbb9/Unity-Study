@@ -1,7 +1,7 @@
 using UnityEngine;// 유니티의 UI조작을 위해 꼭 필요한 엔진
 
 public class UIPopupController : MonoBehaviour {
-    public GameObject Popup;// 팝업으로 띄울 패널(파일명이 같아야함)
+    public GameObject Popup;//
 
     private bool isPopupOpen = false;// 팝업 열림 여부
 

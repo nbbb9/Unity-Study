@@ -5,7 +5,7 @@ public class CameraZoom : MonoBehaviour {
     public float zoomSpeed = 100f;// 줌 속도(휠 감도)
     public float minZoom = 3f;// 최소 줌 크기
     public float maxZoom = 15f;// 최대 줌 크기
-    public float panSpeed = 10f;// 카메라 패닝 속도
+    public float panSpeed = 5f;// 카메라 패닝 속도
     public float rotateSpeed = 20f; // 회전 속도
     private Camera cam;// 카메라 컴포넌트를 저장할 변수
     /*

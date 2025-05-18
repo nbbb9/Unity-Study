@@ -1,9 +1,13 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SelectableObject : MonoBehaviour {
     private Color originalColor;//기존 색상(회색)
     private Renderer rend;// 
     public System.Action<PrimitiveType, Vector3> onReselect;// 콜백
+    public GameObject infoPopup; // 선택한 Object popup
+    public Text nameText;        // O*N 아래 Text
+    public Text typeText;        // O*T 아래 Text
     void Start() {
         rend = GetComponent<Renderer>();
         if (rend != null) {
@@ -27,7 +31,12 @@ public class SelectableObject : MonoBehaviour {
         if (onReselect != null) {
             PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);
             onReselect.Invoke(type, transform.position);
-            Destroy(gameObject); // 기존 오브젝트 제거
+        }
+        // UI 활성화 및 정보 출력
+        if (infoPopup != null && nameText != null && typeText != null) {
+            infoPopup.SetActive(true);
+            nameText.text = $"이름: {gameObject.name}";
+            typeText.text = $"타입: {GetPrimitiveTypeFromName(gameObject.name)}";
         }
     }
 
