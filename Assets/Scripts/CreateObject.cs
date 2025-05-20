@@ -49,6 +49,19 @@ public class CreateObject : MonoBehaviour
     {
         SpawnObjects(PrimitiveType.Sphere);
     }
+    
+    // 캡슐 생성
+    public void SpawnCapsule()
+    {
+        SpawnObjects(PrimitiveType.Capsule);
+    }
+
+    // 원기둥 생성
+    public void SpawnCylinder()
+    {
+        SpawnObjects(PrimitiveType.Cylinder);
+    }
+
 
     // 타입에 맞는 오브젝트 생성 메서드
     void SpawnObjects(PrimitiveType type)
@@ -72,7 +85,7 @@ public class CreateObject : MonoBehaviour
     void FixObject()
     {
         if (!isPlacing || previewObject == null)
-        {
+        {// 설치중이 아니거나 생성한 오브젝트가 존재하지 않으면
             return;
         }
 
@@ -99,23 +112,21 @@ public class CreateObject : MonoBehaviour
             placed.name = currentType.ToString();// 현재 타입을 String으로 변환하여 이름으로 설정
             
             //Todo  매번 찾는것 보다 한번만 찾도록
-            GameObject plane = GameObject.Find("Plane");//Plane을 하이어라키에서 조회
-            if (plane != null)
-            {//Plane이 존재한다면
-                placed.transform.SetParent(plane.transform);// 기본 Plane을 부모로 설정
+            Transform witchPlane = FindPlaneRoot(hit.transform);
+            if (witchPlane != null)
+            {
+                placed.transform.SetParent(witchPlane);
             }
             else
             {
-                Debug.LogWarning("Plane 오브젝트를 찾을 수 없습니다.");
-                placed.transform.SetParent(hit.transform);// 충돌한 평면을 부모로 설정
+                Debug.LogWarning("Plane1 또는 Plane2를 찾을 수 없습니다.");
             }
             
             Rigidbody rb = placed.AddComponent<Rigidbody>();// 중력을 적용할 수 있도록 Rigidbody 추가
             rb.useGravity = true;// 중력 사용
             rb.constraints = RigidbodyConstraints.FreezeRotation; // 필요시 회전 제한
 
-            // Todo var 사용에 대한 -일관성-
-            var selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
+            SelectableObject selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
             selectable.onReselect = (type, pos) =>
             {
                 selectedObject = placed;// 선택된 오브젝트 등록
@@ -127,6 +138,21 @@ public class CreateObject : MonoBehaviour
             isPlacing = false;// 설치 여부 false
         }
     }
+    
+    Transform FindPlaneRoot(Transform hitTransform)
+    {
+        Transform current = hitTransform;
+        while (current != null)
+        {
+            if (current.name == "Plane1" || current.name == "Plane2")
+            {
+                return current;
+            }
+            current = current.parent;
+        }
+        return null;
+    }
+
 
     // 설치한 Object에 Hover기능
     void DetectHoverAndSelect()
@@ -143,12 +169,12 @@ public class CreateObject : MonoBehaviour
             {
                 if (lastHovered != null)
                 {
-                    var lastSel = lastHovered.GetComponent<SelectableObject>();
+                    SelectableObject lastSel = lastHovered.GetComponent<SelectableObject>();
                     if (lastSel != null)
                         lastSel.OnUnhover();
                 }
 
-                var newSel = hitObject.GetComponent<SelectableObject>();
+                SelectableObject newSel = hitObject.GetComponent<SelectableObject>();
                 if (newSel != null)
                 {
                     newSel.OnHover();
@@ -159,7 +185,7 @@ public class CreateObject : MonoBehaviour
 
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {
-                var selected = hitObject.GetComponent<SelectableObject>();
+                SelectableObject selected = hitObject.GetComponent<SelectableObject>();
                 if (selected != null)
                 {
                     selected.OnSelect();
@@ -170,7 +196,7 @@ public class CreateObject : MonoBehaviour
         {
             if (lastHovered != null)
             {// Ray에 아무것도 안 걸리면 hover 해제
-                var lastSel = lastHovered.GetComponent<SelectableObject>();
+                SelectableObject lastSel = lastHovered.GetComponent<SelectableObject>();
                 if (lastSel != null)
                 {
                     lastSel.OnUnhover();
@@ -206,6 +232,13 @@ public class CreateObject : MonoBehaviour
             float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;
             position.y += objectHeight / 2f;
             selectedObject.transform.position = position;
+            
+            // ✅ 부모 평면 업데이트 로직
+            Transform newParent = FindPlaneRoot(hit.transform);
+            if (newParent != null && selectedObject.transform.parent != newParent)
+            {
+                selectedObject.transform.SetParent(newParent);
+            }
         }
     }
 
@@ -215,5 +248,24 @@ public class CreateObject : MonoBehaviour
         isDragging = false;// 드래그 상태 종료
         selectedObject = null;// 
     }
+    // 현재 선택된 오브젝트 삭제
+    public void DeleteSelectedObject()
+    {
+        if (selectedObject != null)
+        {
+            Destroy(selectedObject); // 오브젝트 제거
+            selectedObject = null;   // 참조 초기화
 
+            if (infoPopup != null)
+            {
+                infoPopup.SetActive(false); // 정보 팝업 숨김
+            }
+        }
+        else
+        {
+            Debug.LogWarning("삭제할 선택된 오브젝트가 없습니다.");
+        }
+    }
+
+    
 }
