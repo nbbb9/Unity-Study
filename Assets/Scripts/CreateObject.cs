@@ -14,7 +14,7 @@ public class CreateObject : MonoBehaviour
     public GameObject infoPopup;// 오브젝트 정보 팝업
     public Text nameText;// 선택한 오브젝트 이름 
     public Text typeText;// 선택한 오브젝트 타입
-    private SelectClickMode selectMode = SelectClickMode.JUSTSELECT;// 오브젝트 선택 모드 초기값
+    private SelectClickMode selectMode = SelectClickMode.NONE;// 오브젝트 선택 모드 초기값
 
     void Update()
     {
@@ -233,7 +233,7 @@ public class CreateObject : MonoBehaviour
             position.y += objectHeight / 2f;
             selectedObject.transform.position = position;
             
-            // ✅ 부모 평면 업데이트 로직
+            // 부모 평면 업데이트 로직
             Transform newParent = FindPlaneRoot(hit.transform);
             if (newParent != null && selectedObject.transform.parent != newParent)
             {

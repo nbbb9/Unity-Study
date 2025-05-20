@@ -12,6 +12,7 @@ public class SelectableObject : MonoBehaviour
     public GameObject infoPopup;// 선택한 Object popup
     public TextMeshProUGUI nameText;// O*N 아래 Text
     public TextMeshProUGUI typeText;// O*T 아래 Text
+    public SelectClickMode selectClickMode = SelectClickMode.NONE;
     void Start()
     {
         GameObject canvas = GameObject.Find("Canvas");
@@ -45,8 +46,8 @@ public class SelectableObject : MonoBehaviour
         Vector3 pos = transform.position;
 
         // x와 z를 -5에서 5로 제한
-        pos.x = Mathf.Clamp(pos.x, -5f, 5f);
-        pos.z = Mathf.Clamp(pos.z, -5f, 5f);
+        pos.x = Mathf.Clamp(pos.x, -11.5f, 11.5f);
+        pos.z = Mathf.Clamp(pos.z, -7.5f, 7.5f);
         pos.y = 1.5f; // Plane 바로 위로 고정
 
         // y는 그대로 유지, z는 위에서 클램핑
