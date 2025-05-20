@@ -33,9 +33,7 @@ public class CameraZoom : MonoBehaviour {
         HandleRotate();
     }
 
-    /// <summary>
-    /// Zoom 메서드
-    /// </summary>
+    // Zoom 메서드
     void HandleZoom() {
         float scroll = Mouse.current.scroll.ReadValue().y;// 현재 마우스 휠 입력값을 읽어들임. 위로 굴리면 +, 아래로 굴리면 -
         if (scroll != 0f) {
@@ -44,9 +42,7 @@ public class CameraZoom : MonoBehaviour {
         }
     }
 
-    /// <summary>
-    /// panning 메서드
-    /// </summary>
+    // panning 메서드
     void HandlePan() {
         if (Mouse.current.rightButton.wasPressedThisFrame) {
             // 우클릭을 처음 누른 순간 현재 마우스 위치를 저장.
@@ -64,9 +60,7 @@ public class CameraZoom : MonoBehaviour {
         }
     }
 
-    /// <summary>
-    /// 회전 메서드(아직 이해 안됨.)
-    /// </summary>
+    // 회전 메서드
     void HandleRotate() {
         if (Mouse.current.middleButton.isPressed && rotationTarget != null) {// 마우스 휠을 클릭한 상태에서 마우스를 움직이면 실행됨.
             Vector2 delta = Mouse.current.delta.ReadValue();// 현재 프레임에서 마우스가 얼마나 이동했는지를 얻는다.
@@ -80,9 +74,7 @@ public class CameraZoom : MonoBehaviour {
         }
     }
 
-    /// <summary>
-    /// 카메라 시점 초기화
-    /// </summary>
+    // 카메라 시점 초기화
     public void ResetCameraView() {
         cam.transform.position = initialPosition;
         cam.transform.rotation = initialRotation;
