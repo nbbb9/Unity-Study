@@ -78,7 +78,9 @@ public class CreateObject : MonoBehaviour
     void FixObject()
     {
         if (!isPlacing || previewObject == null)
+        {
             return;
+        }
 
         // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -118,7 +120,8 @@ public class CreateObject : MonoBehaviour
             rb.constraints = RigidbodyConstraints.FreezeRotation; // 필요시 회전 제한
 
             var selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
-            selectable.onReselect = (type, pos) => {
+            selectable.onReselect = (type, pos) =>
+            {
                 selectedObject = placed;// 선택된 오브젝트 등록
                 RePlacing(type, pos);// 오브젝트 이동
             };
@@ -151,7 +154,9 @@ public class CreateObject : MonoBehaviour
 
                 var newSel = hitObject.GetComponent<SelectableObject>();
                 if (newSel != null)
+                {
                     newSel.OnHover();
+                }
 
                 lastHovered = hitObject;
             }
@@ -160,7 +165,9 @@ public class CreateObject : MonoBehaviour
             {
                 var selected = hitObject.GetComponent<SelectableObject>();
                 if (selected != null)
+                {
                     selected.OnSelect();
+                }
             }
         }
         else
@@ -169,7 +176,9 @@ public class CreateObject : MonoBehaviour
             {// Ray에 아무것도 안 걸리면 hover 해제
                 var lastSel = lastHovered.GetComponent<SelectableObject>();
                 if (lastSel != null)
+                {
                     lastSel.OnUnhover();
+                }
                 lastHovered = null;
             }
         }

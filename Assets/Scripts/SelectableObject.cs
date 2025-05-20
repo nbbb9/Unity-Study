@@ -1,21 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SelectableObject : MonoBehaviour {
+public class SelectableObject : MonoBehaviour 
+{
     private Color originalColor;//기존 색상(회색)
     private Renderer rend;// 
     public System.Action<PrimitiveType, Vector3> onReselect;// 
     public GameObject infoPopup;// 선택한 Object popup
     public Text nameText;// O*N 아래 Text
     public Text typeText;// O*T 아래 Text
-    void Start() {
+    void Start()
+    {
         rend = GetComponent<Renderer>();
-        if (rend != null) {
+        if (rend != null)
+        {
             originalColor = rend.material.color;
         }
     }
 
-    void Update() {
+    void Update()
+    {
         Vector3 pos = transform.position;
 
         // x와 z를 -5에서 5로 제한
@@ -28,15 +32,19 @@ public class SelectableObject : MonoBehaviour {
     }
 
     // 호버 활성화
-    public void OnHover() {
-        if (rend != null) {
+    public void OnHover()
+    {
+        if (rend != null)
+        {
             rend.material.color = Color.yellow;
         }
     }
 
     // 호버 비활성화
-    public void OnUnhover() {
-        if (rend != null) {
+    public void OnUnhover()
+    {
+        if (rend != null)
+        {
             rend.material.color = originalColor;
         }
     }
@@ -50,7 +58,8 @@ public class SelectableObject : MonoBehaviour {
             onReselect.Invoke(type, transform.position);
         }
         // UI 활성화 및 정보 출력
-        if (infoPopup != null && nameText != null && typeText != null) {
+        if (infoPopup != null && nameText != null && typeText != null)
+        {
             infoPopup.SetActive(true);
             nameText.text = $"이름: {gameObject.name}";
             typeText.text = $"타입: {GetPrimitiveTypeFromName(gameObject.name)}";
@@ -58,7 +67,8 @@ public class SelectableObject : MonoBehaviour {
     }
 
     // 이름에서 타입 추출
-    PrimitiveType GetPrimitiveTypeFromName(string name) {
+    PrimitiveType GetPrimitiveTypeFromName(string name)
+    {
         return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
     }
 }
