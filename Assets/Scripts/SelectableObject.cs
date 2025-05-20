@@ -11,6 +11,8 @@ public class SelectableObject : MonoBehaviour
     public Text typeText;// O*T 아래 Text
     void Start()
     {
+        infoPopup = GameObject.Find("ObjectInfopopup");
+
         rend = GetComponent<Renderer>();
         if (rend != null)
         {

@@ -14,18 +14,12 @@ public class CreateObject : MonoBehaviour
     public GameObject infoPopup;// 오브젝트 정보 팝업
     public Text nameText;// 선택한 오브젝트 이름 
     public Text typeText;// 선택한 오브젝트 타입
-    private selectClickMode selectMode = selectClickMode.JUSTSELECT;// 오브젝트 선택 모드 초기값
-
-    public enum selectClickMode
-    {// 설치된 오브젝트를 선택했을 때 모드 Enum
-        JUSTSELECT,// 단지 선택
-        MOVE// 움직임 상태
-    }
+    private SelectClickMode selectMode = SelectClickMode.JUSTSELECT;// 오브젝트 선택 모드 초기값
 
     void Update()
     {
         if (isPlacing && previewObject != null)
-        {//만약 설치중이고 선택한 오브젝트가 존재한다면
+        {//만약 설치중이고 선택한 오브젝트(previewObject)가 존재한다면
             FixObject();// 오브젝트 고정
         }
         else
@@ -103,7 +97,8 @@ public class CreateObject : MonoBehaviour
             placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f;// 살짝 띄워서 시작
             placed.transform.rotation = previewObject.transform.rotation;// 
             placed.name = currentType.ToString();// 현재 타입을 String으로 변환하여 이름으로 설정
-
+            
+            //Todo  매번 찾는것 보다 한번만 찾도록
             GameObject plane = GameObject.Find("Plane");//Plane을 하이어라키에서 조회
             if (plane != null)
             {//Plane이 존재한다면
@@ -119,6 +114,7 @@ public class CreateObject : MonoBehaviour
             rb.useGravity = true;// 중력 사용
             rb.constraints = RigidbodyConstraints.FreezeRotation; // 필요시 회전 제한
 
+            // Todo var 사용에 대한 -일관성-
             var selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
             selectable.onReselect = (type, pos) =>
             {
