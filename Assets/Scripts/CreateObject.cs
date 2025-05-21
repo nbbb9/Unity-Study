@@ -14,6 +14,8 @@ public class CreateObject : MonoBehaviour
     public GameObject infoPopup;// 오브젝트 정보 팝업
     public Text nameText;// 선택한 오브젝트 이름 
     public Text typeText;// 선택한 오브젝트 타입
+    public Vector3 originalPosition; // 드래그 시작 시점 위치를 저장할 변수
+    public GameObject installWarningPopup;// 설치 오류 팝업
     private SelectClickMode selectMode = SelectClickMode.NONE;// 오브젝트 선택 모드 초기값
 
     void Update()
@@ -210,6 +212,11 @@ public class CreateObject : MonoBehaviour
         isPlacing = false;// 새로 생성하지 않음
         isDragging = true;// 드래그 상태 true
 
+        if (selectedObject != null)
+        {
+            originalPosition = selectedObject.transform.position; // 시작 위치 저장
+        }
+        
         if (infoPopup != null && nameText != null && typeText != null && selectedObject != null)
         {// UI 정보 갱신
             infoPopup.SetActive(true);
@@ -243,6 +250,33 @@ public class CreateObject : MonoBehaviour
     // 드래그 끝남
     void EndDragging()
     {
+        // 현재 위치가 유효한 Plane 위가 아닌 경우 되돌림
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            Transform plane = FindPlaneRoot(hit.transform);
+            if (plane == null)
+            {
+                installWarningPopup.SetActive(true);
+                Debug.Log("평면이 아니므로 위치 되돌림");
+                if (selectedObject != null)
+                {
+                    selectedObject.transform.position = originalPosition;
+                }
+            }
+        }
+        else
+        {
+            installWarningPopup.SetActive(true);
+            Debug.Log("Ray에 아무것도 걸리지 않음. 위치 되돌림");
+            if (selectedObject != null)
+            {
+                selectedObject.transform.position = originalPosition;
+            }
+        }
+        
         isDragging = false;// 드래그 상태 종료
         selectedObject = null;// 
     }
