@@ -45,19 +45,16 @@ public class CreateObject : MonoBehaviour
     {
         SpawnObjects(PrimitiveType.Cube);
     }
-
     // 구 생성
     public void SpawnSphere()
     {
         SpawnObjects(PrimitiveType.Sphere);
     }
-    
     // 캡슐 생성
     public void SpawnCapsule()
     {
         SpawnObjects(PrimitiveType.Capsule);
     }
-
     // 원기둥 생성
     public void SpawnCylinder()
     {
@@ -140,9 +137,9 @@ public class CreateObject : MonoBehaviour
     }
     
     // 현재 마우스의 위치가 Plane1 또는 Plane2인지 판단하는 메서드
-    Transform FindPlaneRoot(Transform hitTransform)
+    public Transform FindPlaneRoot(Transform hitTransform)
     {
-        Debug.Log("hitTransform" + hitTransform);
+        Debug.Log("부딫힌 트랜스폼: " + hitTransform);
         Transform current = hitTransform;
         while (current != null)
         {
@@ -201,7 +198,6 @@ public class CreateObject : MonoBehaviour
         }
         else
         {// 만약 부딫힌 것이 없다면
-            Debug.Log("3");
             if (lastHovered != null)
             {// 이전 호버된 오브젝트가 존재한다면
                 Debug.Log("4");
@@ -239,36 +235,19 @@ public class CreateObject : MonoBehaviour
         //
         if (Physics.Raycast(ray, out hit))
         {// 만약 ray에 부딫힌것이 있다면
-            
-            Debug.Log("실시간 평면 : " + FindPlaneRoot(hit.transform).name);
-            
             Vector3 position = hit.point;// 부딫힌 부분 위치 변수
             
             float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트 위치 설정
             position.y += objectHeight / 2f;// 오브젝트 높이 계산
             selectedObject.transform.position = position;// 선택한 오브젝트의 위치를 갱신
-            
-            // 부모 평면 업데이트 로직
-            // Transform newParent = FindPlaneRoot(hit.transform);// 새로운 부모 오브젝트 찾기
-            // if (newParent != null && selectedObject.transform.parent != newParent)
-            // {// 평면이 존재하고 선택한 오브젝트의 부모와 새로운 부모가 다르다면
-            //     selectedObject.transform.SetParent(newParent);// 오브젝트의 부모 업데이트
-            // }
         }
         
-        Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);
+        Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
         RaycastHit downHit;
         
         if (Physics.Raycast(downRay, out downHit))
-        {
-            
-            // Vector3 position = downHit.point;// 부딫힌 부분 위치 변수
-            
-            
-            // float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트 위치 설정
-            // position.y += objectHeight / 2f;// 오브젝트 높이 계산
-            // selectedObject.transform.position = position;// 선택한 오브젝트의 위치를 갱신
-            
+        {// 만약 오브젝트 기준으로 부딫히는 부분이 있다면
+            // 부모 평면 업데이트 로직
             Transform newParent = FindPlaneRoot(downHit.transform);
             Debug.Log("새로운 부모??? : " + newParent.name);
             if (newParent != null && selectedObject.transform.parent != newParent)
@@ -284,15 +263,12 @@ public class CreateObject : MonoBehaviour
     {
         Debug.Log("드래그 끝!");
         // 현재 위치가 유효한 Plane 위가 아닌 경우 되돌림
-        // Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        // RaycastHit hit;
-
-        Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);
-        RaycastHit downHit;
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit hit;
         
-        if (Physics.Raycast(downRay, out downHit))
+        if (Physics.Raycast(ray, out hit))
         {// 만약 ray에 부딫힌것이 있다면
-            Transform plane = FindPlaneRoot(downHit.transform);// 현재 부딫힌 평면 찾기
+            Transform plane = FindPlaneRoot(hit.transform);// 현재 부딫힌 평면 찾기
             Debug.Log("드래그가 끝나면서 부딫힌 평면 : " + plane.name);
             if (plane == null)
             {// 만약 Plane이 null이라면

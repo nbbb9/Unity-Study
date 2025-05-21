@@ -88,16 +88,6 @@ public class SelectableObject : MonoBehaviour
     // 이름에서 타입 추출
     PrimitiveType GetPrimitiveTypeFromName(string name)
     {
-        // return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
-        foreach (PrimitiveType type in System.Enum.GetValues(typeof(PrimitiveType)))
-        {
-            if (name.Contains(type.ToString()))
-            {
-                return type;
-            }
-        }
-
-        // 기본값 지정
-        return PrimitiveType.Cube;
+        return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
     }
 }
