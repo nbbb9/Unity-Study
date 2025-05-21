@@ -70,12 +70,31 @@ public class SelectableObject : MonoBehaviour
     // 
     public void OnSelect()
     {
+        Debug.Log($"[OnSelect] 현재 SelectClickMode: {selectClickMode}");
+
+        // 선택 모드 전환 처리
+        if (selectClickMode == SelectClickMode.NONE)
+        {
+            selectClickMode = SelectClickMode.JUSTSELECT;
+            Debug.Log("[OnSelect] 상태 변경: NONE → JUSTSELECT");
+        }
+        else if (selectClickMode == SelectClickMode.JUSTSELECT)
+        {
+            selectClickMode = SelectClickMode.MOVE;
+            Debug.Log("[OnSelect] 상태 변경: JUSTSELECT → MOVE");
+        }
+        else if (selectClickMode == SelectClickMode.MOVE)
+        {
+            selectClickMode = SelectClickMode.NONE;
+            Debug.Log("[OnSelect] 상태 변경: MOVE → NONE");
+        }
+
         if (onReselect != null)
         {
             PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);
             onReselect.Invoke(type, transform.position);
         }
-        
+
         if (infoPopup != null && nameText != null && typeText != null)
         {
             // UI 활성화 및 정보 출력
@@ -84,6 +103,7 @@ public class SelectableObject : MonoBehaviour
             typeText.text = $"{GetPrimitiveTypeFromName(gameObject.name)}";
         }
     }
+
 
     // 이름에서 타입 추출
     PrimitiveType GetPrimitiveTypeFromName(string name)
