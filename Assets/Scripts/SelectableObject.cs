@@ -4,50 +4,48 @@ using TMPro;
 public class SelectableObject : MonoBehaviour 
 {
     private Color originalColor;//기존 색상(회색)
-    private Renderer rend;// 
+    private Renderer rend;
     public System.Action<PrimitiveType, Vector3> onReselect;// 
-    public GameObject infoPopup;// 선택한 Object popup
+    public GameObject infoPopup;// 선택한 ObjectPopup
     public TextMeshProUGUI nameText;// O*N 아래 Text
     public TextMeshProUGUI typeText;// O*T 아래 Text
-    public SelectClickMode selectClickMode = SelectClickMode.NONE;
-    void Start()
+    public SelectClickMode selectClickMode = SelectClickMode.NONE;// 오브젝트 선택 모드 초기값
+    private void Start()
     {
-        GameObject canvas = GameObject.Find("Canvas");
-        if (canvas != null)
-        {
-            Transform InfoPopupTransform = canvas.transform.Find("ObjectInfoPopup");
-            Transform popupTransform = canvas.transform.Find("ObjectInfoPopup/GameObjectInfo");
-            if (popupTransform != null)
-            {
-                infoPopup = InfoPopupTransform.gameObject;
+        GameObject canvas = GameObject.Find("Canvas");// 게임 오브젝트에서 찾기
+        Transform infoPopupTransform = canvas.transform.Find("ObjectInfoPopup");// 게임 오브젝트에서 찾기
+        Transform objectInfo = canvas.transform.Find("ObjectInfoPopup/GameObjectInfo");// 게임 오브젝트에서 찾기
+        
+        if (objectInfo != null)
+        {//오브젝트 정보창이 존재한다면
+            infoPopup = infoPopupTransform.gameObject;// 오브젝트 팝업 전역 변수에 할당
 
-                Transform nameObj = popupTransform.Find("name");
-                if (nameObj != null)
-                    nameText = nameObj.GetComponent<TextMeshProUGUI>();
-
-                Transform typeObj = popupTransform.Find("type");
-                if (typeObj != null)
-                    typeText = typeObj.GetComponent<TextMeshProUGUI>();
+            Transform nameObj = objectInfo.Find("name");// 오브젝트 이름
+            Transform typeObj = objectInfo.Find("type");// 오브젝트 타입
+            if (nameObj != null && typeObj != null)
+            {// 이름과 타입이 존재한다면
+                nameText = nameObj.GetComponent<TextMeshProUGUI>();// 오브젝트 이름 할당
+                typeText = typeObj.GetComponent<TextMeshProUGUI>();// 오브젝트 타입 할당
             }
+            
         }
 
-        rend = GetComponent<Renderer>();
+        rend = GetComponent<Renderer>();// 현재 오브젝트에 붙어 있는 Renderder 컴포넌트를 가져와서 rend에 저장
         if (rend != null)
-        {
-            originalColor = rend.material.color;
+        {// rend가 존재할 경우
+            originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장
         }
     }
 
     void Update()
     {
-        Vector3 pos = transform.position;
+        Vector3 pos = transform.position;// 3차원 포지션 변수 선언
 
-        // x와 z를 -5에서 5로 제한
+        // x와 z의 구역 제한
         pos.x = Mathf.Clamp(pos.x, -11.5f, 11.5f);
         pos.z = Mathf.Clamp(pos.z, -7.5f, 7.5f);
-        pos.y = 1.5f; // Plane 바로 위로 고정
+        pos.y = 1.51f;// Plane 바로 위로 고정
 
-        // y는 그대로 유지, z는 위에서 클램핑
         transform.position = new Vector3(pos.x, pos.y, pos.z);
     }
 
@@ -77,16 +75,29 @@ public class SelectableObject : MonoBehaviour
             PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);
             onReselect.Invoke(type, transform.position);
         }
-
-        // UI 활성화 및 정보 출력
-        infoPopup.SetActive(true);
-        nameText.text = $"{gameObject.name}";
-        typeText.text = $"{GetPrimitiveTypeFromName(gameObject.name)}";
+        
+        if (infoPopup != null && nameText != null && typeText != null)
+        {
+            // UI 활성화 및 정보 출력
+            infoPopup.SetActive(true);
+            nameText.text = $"{gameObject.name}";
+            typeText.text = $"{GetPrimitiveTypeFromName(gameObject.name)}";
+        }
     }
 
     // 이름에서 타입 추출
     PrimitiveType GetPrimitiveTypeFromName(string name)
     {
-        return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
+        // return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
+        foreach (PrimitiveType type in System.Enum.GetValues(typeof(PrimitiveType)))
+        {
+            if (name.Contains(type.ToString()))
+            {
+                return type;
+            }
+        }
+
+        // 기본값 지정
+        return PrimitiveType.Cube;
     }
 }

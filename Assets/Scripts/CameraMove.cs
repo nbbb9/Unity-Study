@@ -18,7 +18,7 @@ public class CameraZoom : MonoBehaviour
     private float initialSize;// 초기 줌 크기 저장
     public Transform rotationTarget;// Plane 같은 회전 기준 오브젝트를 드래그해서 할당
 
-    void Start()
+    private void Start()
     {
         // 해당 컴포넌트(코드 파일)를 붙인 오브젝트(카메라)에서 camera컴포넌트를 가져와 cam변수에 저장.
         // 이후 카메라 속성 변경 시 이 cam을 사용.
@@ -29,7 +29,7 @@ public class CameraZoom : MonoBehaviour
         initialSize = cam.orthographicSize;// 카메라 초기 줌
     }
 
-    void Update()
+    private void Update()
     {
         HandleZoom();
         HandlePan();
