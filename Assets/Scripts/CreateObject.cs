@@ -73,7 +73,6 @@ public class CreateObject : MonoBehaviour
 
         currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
 
-        Debug.Log(previewMaterial);
         previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
         previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
         previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 법칙? 적용
@@ -81,7 +80,7 @@ public class CreateObject : MonoBehaviour
         isPlacing = true;//설치중으로 변경.
     }
 
-    // 마우스 좌클릭을 하면 해당 위치에 고정
+    // 오브젝트 설치
     void FixObject()
     {
         if (!isPlacing || previewObject == null)
@@ -102,10 +101,9 @@ public class CreateObject : MonoBehaviour
 
             previewObject.transform.position = position;
         }
-
-        // 마우스 왼쪽 클릭 시 확정
+        
         if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
+        {// 마우스 왼쪽 클릭 시 확정
             GameObject placed = GameObject.CreatePrimitive(currentType);// 현재 타입을 적용한 오브젝트 생성 후 설치
             placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f;// 살짝 띄워서 시작
             placed.transform.rotation = previewObject.transform.rotation;// 
@@ -248,6 +246,7 @@ public class CreateObject : MonoBehaviour
         isDragging = false;// 드래그 상태 종료
         selectedObject = null;// 
     }
+    
     // 현재 선택된 오브젝트 삭제
     public void DeleteSelectedObject()
     {
@@ -266,6 +265,5 @@ public class CreateObject : MonoBehaviour
             Debug.LogWarning("삭제할 선택된 오브젝트가 없습니다.");
         }
     }
-
     
 }

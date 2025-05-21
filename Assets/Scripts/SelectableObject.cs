@@ -1,8 +1,5 @@
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
 using TMPro;
-
 
 public class SelectableObject : MonoBehaviour 
 {
@@ -80,9 +77,7 @@ public class SelectableObject : MonoBehaviour
             PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);
             onReselect.Invoke(type, transform.position);
         }
-        
-        Debug.Log(infoPopup + " infoPopup");
-        Debug.Log(gameObject.name);
+
         // UI 활성화 및 정보 출력
         infoPopup.SetActive(true);
         nameText.text = $"{gameObject.name}";
