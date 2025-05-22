@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class CreateObject : MonoBehaviour 
+public class CreateObject : MonoBehaviour
 {
+    public MoveObject moveObject;
+    
     private GameObject previewObject;// 팝업에서 선택한 Object
     public Material previewMaterial;// 설치전 보일 material(붉은색)
     private bool isPlacing = false;// 설치중 여부
@@ -16,6 +19,14 @@ public class CreateObject : MonoBehaviour
     public GameObject installWarningPopup;// 설치 오류 팝업
     private SelectClickMode selectMode = SelectClickMode.NONE;// 오브젝트 선택 모드 초기값
 
+    private void Awake()
+    {
+        if (moveObject == null)
+        {
+            moveObject = GetComponent<MoveObject>();
+        }
+    }
+
     private void Update()
     {
         if (isPlacing && previewObject != null)
@@ -24,16 +35,16 @@ public class CreateObject : MonoBehaviour
         }
         else
         {
-            DetectHoverAndSelect();// 호버 감지
+            moveObject.DetectHoverAndSelect();// 호버 감지
 
             if (isDragging && selectedObject != null)
             {// 드래그 중이고 선택한 오브젝트가 있다면
-                DragSelectedObject();// 드래그 시작
+                moveObject.Drag();// 드래그 시작
             }
 
             if (isDragging && Mouse.current.leftButton.wasReleasedThisFrame)
             {// 드래그 중이고 마우스 좌클릭이 풀어진다면
-                EndDragging();// 드래그 종료
+                moveObject.EndDragging();// 드래그 종료
             }
         }
     }
@@ -107,7 +118,7 @@ public class CreateObject : MonoBehaviour
             placed.transform.rotation = previewObject.transform.rotation;
             placed.name = currentType.ToString();// 현재 타입을 String으로 변환하여 이름으로 설정
             
-            Transform witchPlane = FindPlaneRoot(hit.transform);// 마우스의 Ray Hit값을 인자로 넣는다.
+            Transform witchPlane = moveObject.FindPlaneRoot(hit.transform);// 마우스의 Ray Hit값을 인자로 넣는다.
             if (witchPlane != null)
             {// 위치값이 존재한다면
                 placed.transform.SetParent(witchPlane);//해당 위치값을 부모로 설정
@@ -134,81 +145,7 @@ public class CreateObject : MonoBehaviour
         }
     }
     
-    // 현재 마우스의 위치가 Plane1 또는 Plane2인지 판단하는 메서드
-    public Transform FindPlaneRoot(Transform hitTransform)
-    {
-        // Debug.Log("부딫힌 트랜스폼: " + hitTransform);
-        Transform current = hitTransform;
-        while (current != null)
-        {
-            if (current.name == "Plane1" || current.name == "Plane2")
-            {//만약 인자로 받은 TransForm이 Plane1또는 Plane2라면 현재 위치 반환.
-                return current;
-            }
-            current = current.parent;
-        }
-        return null;//
-    }
-
-
-    // 설치한 Object에 Hover기능
-    void DetectHoverAndSelect()
-    {
-        // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {// 만약 부딫힌것이 있다면
-            GameObject hitObject = hit.collider.gameObject;// Ray에 부딫힌 오브젝트 변수화
-
-            if (hitObject != lastHovered)
-            {//만약 부딫힌 오브젝트가 이전 호버된 오브젝트와 다르다면
-                // Debug.Log("1");
-                if (lastHovered != null)
-                {// 만약 이전 호버된 오브젝트가 존재한다면
-                    SelectableObject lastSel = lastHovered.GetComponent<SelectableObject>();// 이전 호버된 오브젝트에 SelectableObject 컴포넌트 추가
-                    if (lastSel != null)
-                    {// 만약 이전 호버된 오브젝트가 존재한다면
-                        lastSel.OnUnhover();// 호버 비활성화 처리
-                    }
-                }
-
-                SelectableObject newSel = hitObject.GetComponent<SelectableObject>();// 새로 부딫힌 오브젝트 SelectableObject 컴포넌트 추가
-                if (newSel != null)
-                {// 새로 부딫힌 오브젝트가 존재한다면
-                    newSel.OnHover();// 호버 활성화
-                }
-
-                lastHovered = hitObject;// 이전 호버 오브젝트 갱신
-            }
-
-            if (Mouse.current.leftButton.wasPressedThisFrame)
-            {// 부딫힌것이 있는데 마우스 좌클릭하면
-                // Debug.Log("2");
-                SelectableObject selected = hitObject.GetComponent<SelectableObject>();// 선택한 오브젝트로 설정
-                if (selected != null)
-                {// 만약 선택한 오브젝트가 존재한다면
-                    // Debug.Log("2.1");
-                    selected.OnSelect();// 선택 상태로 설정
-                }
-            }
-        }
-        else
-        {// 만약 부딫힌 것이 없다면
-            if (lastHovered != null)
-            {// 이전 호버된 오브젝트가 존재한다면
-                // Debug.Log("4");
-                SelectableObject lastSel = lastHovered.GetComponent<SelectableObject>();// 이전 호버된 오브젝트에 SelectableObject 컴포넌트 추가
-                if (lastSel != null)
-                {// 이전 호버된 오브젝트가 존재한다면
-                    lastSel.OnUnhover();// 호버 비활성화
-                }
-                lastHovered = null;// 이전 호버된 오브젝트 제거
-            }
-        }
-    }
-
+    
     // 기존 오브젝트를 선택 후 이동을 위한 준비
     void RePlacing(PrimitiveType type, Vector3? startPosition = null)
     {
@@ -219,79 +156,13 @@ public class CreateObject : MonoBehaviour
         if (selectedObject != null)
         {// 선택한 오브젝트가 존재한다면
             originalPosition = selectedObject.transform.position;// 시작 위치 저장
+            moveObject.setSelectedObject(selectedObject);
+            moveObject.setInstallWarningPopup(installWarningPopup);
+            moveObject.StartDragging();
         }
         
     }
-    
-    // 선택된 오브젝트를 드래그로 이동
-    void DragSelectedObject()
-    {
-        // Debug.Log("드래그 시작!");
-        
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
-        //
-        if (Physics.Raycast(ray, out hit))
-        {// 만약 ray에 부딫힌것이 있다면
-            Vector3 position = hit.point;// 부딫힌 부분 위치 변수
-            
-            float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트 위치 설정
-            position.y += objectHeight / 2f;// 오브젝트 높이 계산
-            selectedObject.transform.position = position;// 선택한 오브젝트의 위치를 갱신
-        }
-        
-        Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
-        RaycastHit downHit;
-        
-        if (Physics.Raycast(downRay, out downHit))
-        {// 만약 오브젝트 기준으로 부딫히는 부분이 있다면
-            // 부모 평면 업데이트 로직
-            Transform newParent = FindPlaneRoot(downHit.transform);
-            // Debug.Log("새로운 부모??? : " + newParent.name);
-            if (newParent != null && selectedObject.transform.parent != newParent)
-            {
-                // Debug.Log("부모 평면 변경됨: " + newParent.name);
-                selectedObject.transform.SetParent(newParent);
-            }
-        }
-    }
-
-    // 드래그 끝남
-    void EndDragging()
-    {
-        // Debug.Log("드래그 끝!");
-        // 현재 위치가 유효한 Plane 위가 아닌 경우 되돌림
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
-        
-        if (Physics.Raycast(ray, out hit))
-        {// 만약 ray에 부딫힌것이 있다면
-            Transform plane = FindPlaneRoot(hit.transform);// 현재 부딫힌 평면 찾기
-            // Debug.Log("드래그가 끝나면서 부딫힌 평면 : " + plane.name);
-            if (plane == null)
-            {// 만약 Plane이 null이라면
-                installWarningPopup.SetActive(true);// 경고 문구 출력
-                // Debug.Log("평면이 아니므로 위치 되돌림");
-                if (selectedObject != null)
-                {// 선택한 오브젝트가 존재한다면
-                    selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
-                }
-            }
-        }
-        else
-        {// 만약 ray에 부딫힌 것이 없다면
-            installWarningPopup.SetActive(true);// 경고 문구 출력
-            // Debug.Log("Ray에 아무것도 걸리지 않음. 위치 되돌림");
-            if (selectedObject != null)
-            {// 만약 선택한 오브젝트가 존재한다면
-                selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
-            }
-        }
-        
-        isDragging = false;// 드래그 상태 종료
-        selectedObject = null;// 선택한 오브젝트 제거
-    }
-    
+  
     // 현재 선택된 오브젝트 삭제
     public void DeleteSelectedObject()
     {
