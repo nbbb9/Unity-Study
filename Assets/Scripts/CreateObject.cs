@@ -12,8 +12,6 @@ public class CreateObject : MonoBehaviour
     private PrimitiveType currentType;// 현재 Object 타입
     private GameObject lastHovered = null;// 이전 호버 오브젝트
     public GameObject infoPopup;// 오브젝트 정보 팝업
-    public Text nameText;// 선택한 오브젝트 이름 
-    public Text typeText;// 선택한 오브젝트 타입
     public Vector3 originalPosition; // 드래그 시작 시점 위치를 저장할 변수
     public GameObject installWarningPopup;// 설치 오류 팝업
     private SelectClickMode selectMode = SelectClickMode.NONE;// 오브젝트 선택 모드 초기값

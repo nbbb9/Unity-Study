@@ -67,11 +67,9 @@ public class SelectableObject : MonoBehaviour
         }
     }
 
-    // 
+    // 선택했을 때 수행되는 메서드
     public void OnSelect()
     {
-        Debug.Log($"[OnSelect] 현재 SelectClickMode: {selectClickMode}");
-
         // 선택 모드 전환 처리
         if (selectClickMode == SelectClickMode.NONE)
         {
@@ -103,7 +101,6 @@ public class SelectableObject : MonoBehaviour
             typeText.text = $"{GetPrimitiveTypeFromName(gameObject.name)}";
         }
     }
-
 
     // 이름에서 타입 추출
     PrimitiveType GetPrimitiveTypeFromName(string name)

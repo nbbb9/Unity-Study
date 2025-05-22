@@ -19,8 +19,7 @@ public class CameraZoom : MonoBehaviour
     public Transform rotationTarget;// Plane 같은 회전 기준 오브젝트를 드래그해서 할당
 
     private void Start()
-    {
-        // 해당 컴포넌트(코드 파일)를 붙인 오브젝트(카메라)에서 camera컴포넌트를 가져와 cam변수에 저장.
+    {   // 해당 컴포넌트(코드 파일)를 붙인 오브젝트(카메라)에서 camera컴포넌트를 가져와 cam변수에 저장.
         // 이후 카메라 속성 변경 시 이 cam을 사용.
         // 초기 위치/회전/줌 정보를 저장
         cam = GetComponent<Camera>();
@@ -51,14 +50,12 @@ public class CameraZoom : MonoBehaviour
     void HandlePan()
     {
         if (Mouse.current.rightButton.wasPressedThisFrame)
-        {
-            // 우클릭을 처음 누른 순간 현재 마우스 위치를 저장.
+        {   // 우클릭을 처음 누른 순간 현재 마우스 위치를 저장.
             // 이후 마우스를 얼마나 이동했는지를 계산하기 위해 기준점으로 사용.
             lastMousePosition = Mouse.current.position.ReadValue();
         }
         if (Mouse.current.rightButton.isPressed)
-        {
-            // 마우스 우클릭을 계속 누르고 있을 때, 마우스를 얼마나 움직였는지
+        {   // 마우스 우클릭을 계속 누르고 있을 때, 마우스를 얼마나 움직였는지
             // 계산해서 그 만큼 카메라를 XY 평면으로 이동
             Vector2 currentMousePos = Mouse.current.position.ReadValue();
             Vector2 delta = currentMousePos - (Vector2)lastMousePosition;// 이동 범위
