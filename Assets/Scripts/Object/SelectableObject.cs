@@ -10,6 +10,7 @@ namespace Object
         private Color originalColor;//기존 색상(회색)
         private Renderer rend;
         public Action<PrimitiveType, Vector3> onReselect;// 
+        public PrimitiveType objectType;
         public GameObject infoPopup;// 선택한 ObjectPopup
         public TextMeshProUGUI nameText;// O*N 아래 Text
         public TextMeshProUGUI typeText;// O*T 아래 Text
@@ -88,8 +89,9 @@ namespace Object
 
             if (onReselect != null)
             {
-                PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);// 오브젝트 이름에서 타입 추출
-                onReselect.Invoke(type, transform.position);// 
+                // PrimitiveType type = GetPrimitiveTypeFromName(gameObject.name);// 오브젝트 이름에서 타입 추출
+                // onReselect.Invoke(type, transform.position);
+                onReselect.Invoke(objectType, transform.position); // 이름 대신 타입 필드 사용
             }
 
             if (infoPopup != null && nameText != null && typeText != null)
@@ -97,14 +99,9 @@ namespace Object
                 // UI 활성화 및 정보 출력
                 infoPopup.SetActive(true);
                 nameText.text = $"{gameObject.name}";
-                typeText.text = $"{GetPrimitiveTypeFromName(gameObject.name)}";
+                typeText.text = $"{objectType}";
             }
         }
-
-        // 이름에서 타입 추출
-        PrimitiveType GetPrimitiveTypeFromName(string name)
-        {
-            return (PrimitiveType)System.Enum.Parse(typeof(PrimitiveType), name);
-        }
+        
     }
 }

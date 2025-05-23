@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,6 +21,8 @@ namespace Object
         public Vector3 originalPosition; // 드래그 시작 시점 위치를 저장할 변수
         public GameObject installWarningPopup;// 설치 오류 팝업
         private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
+        
+        private Dictionary<PrimitiveType, GameObject> prefabCache = new();
 
         private void Awake()
         {
@@ -65,8 +68,21 @@ namespace Object
             }
 
             currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
+            
+            string prefabName = type.ToString(); // Cube, Sphere 등 프리팹 이름은 PrimitiveType 이름과 동일하다고 가정
+            GameObject prefab = Resources.Load<GameObject>($"Prefabs/{prefabName}");
+    
+            if (prefab != null)
+            {
+                previewObject = Instantiate(prefab); // 프리팹을 인스턴스화
+            }
+            else
+            {
+                Debug.LogError($"Prefabs/{prefabName} 프리팹을 찾을 수 없습니다.");
+                return;
+            }
 
-            previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
+            // previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
             previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
             previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
 
@@ -98,7 +114,8 @@ namespace Object
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {// 마우스 왼쪽 클릭 시 확정
                 // Debug.Log("오브젝트 설치!");
-                GameObject placed = GameObject.CreatePrimitive(currentType);// 현재 타입을 적용한 오브젝트 생성 후 설치
+                // GameObject placed = GameObject.CreatePrimitive(currentType);// 현재 타입을 적용한 오브젝트 생성 후 설치
+                GameObject placed = Instantiate(Resources.Load<GameObject>($"Prefabs/{currentType.ToString()}"));
                 placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f;// 살짝 띄워서 시작
                 placed.transform.rotation = previewObject.transform.rotation;
                 placed.name = currentType.ToString();// 현재 타입을 String으로 변환하여 이름으로 설정
@@ -118,6 +135,7 @@ namespace Object
                 rb.constraints = RigidbodyConstraints.FreezeRotation;// 필요시 회전 제한
 
                 SelectableObject selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
+                selectable.objectType = currentType; // 오브젝트 타입 직접 지정
                 selectable.onReselect = (type, pos) =>
                 {
                     selectedObject = placed;// 선택된 오브젝트 등록
