@@ -4,6 +4,7 @@ namespace Enums
     {
         DEFAULT,// 기본 상태
         JUSTSELECT,// 단지 선택
-        MOVE// 움직임 상태
+        MOVE,// 움직임 상태
+        HOVERED//호버 상태
     }
 }

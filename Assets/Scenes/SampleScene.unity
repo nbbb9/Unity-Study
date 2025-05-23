@@ -3063,7 +3063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4a0a2e1c811e53409d40376480e9ed4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectObjectListPopup: {fileID: 0}
+  selectObjectListPopup: {fileID: 383119553}
 --- !u!4 &1566205578
 Transform:
   m_ObjectHideFlags: 0

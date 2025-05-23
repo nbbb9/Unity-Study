@@ -70,7 +70,7 @@ namespace Ui
         // 회전 메서드
         void HandleRotate()
         {
-            if (Mouse.current.middleButton.isPressed && rotationTarget != null)
+            if (Mouse.current.middleButton.isPressed && rotationTarget)
             {// 마우스 휠을 클릭한 상태에서 마우스를 움직이면 실행됨.
                 Vector2 delta = Mouse.current.delta.ReadValue();// 현재 프레임에서 마우스가 얼마나 이동했는지를 얻는다.
                 float rotX = delta.y * rotateSpeed * Time.deltaTime;

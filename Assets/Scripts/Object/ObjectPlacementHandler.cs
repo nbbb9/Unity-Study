@@ -1,29 +1,32 @@
-﻿using UnityEngine;
+﻿using System.Net.Sockets;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using SelectMode = Enums.SelectMode;
 
 namespace Object
 {
     public class ObjectPlacementHandler : MonoBehaviour
     {
         private GameObject selectedObject;// 선택한 오브젝트
+        private SelectableObject lastSelectedObject;// 마지막으로 선택한 오브젝트
         private Vector3 originalPosition;// 드래그 시작 시점 위치를 저장할 변수
         private GameObject installWarningPopup;// 설치 오류 팝업
         private GameObject lastHoveredObject;// 이전 호버 오브젝트
 
-        public void setSelectedObject(GameObject obj)
+        public void SetSelectedObject(GameObject obj)
         {
             selectedObject = obj;
-            originalPosition = obj != null ? obj.transform.position : Vector3.zero;
+            originalPosition = obj ? obj.transform.position : Vector3.zero;
         }
     
-        public void setInstallWarningPopup(GameObject popup)
+        public void SetInstallWarningPopup(GameObject popup)
         {
             installWarningPopup = popup;
         }
 
         public void StartDragging()
         {
-            if (selectedObject != null)
+            if (selectedObject)
             {// 선택한 오브젝트가 존재한다면
                 originalPosition = selectedObject.transform.position;
             }
@@ -33,13 +36,13 @@ namespace Object
         // 드래그 시작
         public void Drag()
         {
-            if (selectedObject == null)
+            if (!selectedObject)
             {
                 return;
             }
         
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        
+            
             if (Physics.Raycast(ray, out RaycastHit hit))
             {// 만약 ray에 부딪힌것이 있다면
                 Vector3 position = hit.point;// 부딪힌 부분 위치 변수
@@ -55,10 +58,10 @@ namespace Object
                 // 부모 평면 업데이트 로직
                 Transform newParent = FindPlaneRoot(downHit.transform);
                 // Debug.Log("새로운 부모??? : " + newParent.name);
-                if (newParent != null && selectedObject.transform.parent != newParent)
-                {
+                if (newParent && selectedObject.transform.parent != newParent)
+                {// 만약 새로운 부모가 존재하고 선택한 오브젝트의 부모가 새로운 부모와 다르다면
                     // Debug.Log("부모 평면 변경됨: " + newParent.name);
-                    selectedObject.transform.SetParent(newParent);
+                    selectedObject.transform.SetParent(newParent);// 새로운 부모로 갱신
                 }
             }
         }
@@ -66,23 +69,31 @@ namespace Object
         // 드래그 종료
         public void EndDragging()
         {
-            if (selectedObject == null)
+            if (!selectedObject)
             {
                 return;
             }
+            
+            // 드래그 끝나면 infoPopup 비활성화
+            SelectableObject selectable = selectedObject.GetComponent<SelectableObject>();// 선택한 오브젝트의 컴포넌트 세팅
+            if (selectable && selectable.infoPopup)
+            {// 선택한 오브젝트가 존재하고 정보 팝업이 존재한다면
+                selectable.infoPopup.SetActive(false);// 정보 팝업 비활성화
+                selectable.selectMode = SelectMode.DEFAULT;// Default 모드로 변경
+            }
         
-            // Debug.Log("드래그 끝!");
-            // 현재 위치가 유효한 Plane 위가 아닌 경우 되돌림
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            // Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
 
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(downRay, out RaycastHit hit))
             {// 만약 ray에 부딪힌것이 있다면
                 Transform plane = FindPlaneRoot(hit.transform);// 현재 부딪힌 평면 찾기
-                if (plane == null)
+                if (!plane)
                 {// 만약 Plane이 null이라면
                     installWarningPopup.SetActive(true);// 경고 문구 출력
                     selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
                 }
+                selectedObject.transform.SetParent(plane);// 부모 설정
             }
             else
             {// 만약 ray에 부딪힌 것이 없다면
@@ -103,32 +114,41 @@ namespace Object
             if (Physics.Raycast(ray, out hit))
             {// 만약 부딪힌것이 있다면
                 GameObject hitObject = hit.collider.gameObject;// Ray에 부딪힌 오브젝트 변수화
-                if (lastHoveredObject != null && lastHoveredObject != hitObject)
-                {
-                    if (lastHoveredObject.TryGetComponent<SelectableObject>(out var lastSel))
-                    {
-                        lastSel.HoverController("deactivate");
+                if (lastHoveredObject && lastHoveredObject != hitObject)
+                {// 마지막 호버 오브젝트가 존재하고 현재 부딪힌 오브젝트와 다르다면
+                    if (lastHoveredObject.TryGetComponent<SelectableObject>(out SelectableObject lastSel))
+                    {// 마지막 호버 오브젝트에 SelectableObject컴포넌트가 존재한다면 lastSel 변수에 해당 컴포넌트를 할당하고 조건문 안으로 들임
+                        lastSel.HoverController("deactivate");// 해당 오브젝트의 호버를 비활성화
                     }
-                    lastHoveredObject = null;
+                    lastHoveredObject = null;// 마지막 호버 오브젝트 제거
                 }
 
-                if (hitObject.TryGetComponent<SelectableObject>(out var newSel))
-                {
-                    newSel.HoverController("activate");
-                    lastHoveredObject = hitObject;
+                if (hitObject.TryGetComponent<SelectableObject>(out SelectableObject newSel))
+                {// Ray에 부딪힌 오브젝트에 SelectableObject 컴포넌트가 존재한다면 newSel 변수에 해당 컴포넌트를 할당하고 조건문 안으로 들임
+                    newSel.HoverController("activate");// 해당 오브젝트의 호버를 활성화
+                    lastHoveredObject = hitObject;// 마지막 호버 오브젝트 갱신
                 }
 
                 if (Mouse.current.leftButton.wasPressedThisFrame)
-                {
-                    if (hitObject.TryGetComponent<SelectableObject>(out var selected))
-                    {
-                        selected.OnSelect();
+                {// 만약 마우스 좌클릭을 수행한다면
+                    if (lastSelectedObject && hitObject != lastHoveredObject)
+                    {// 이전에 선택한 오브젝트가 존재하고 이전 Ray에 부딪힌 오브젝트와 같지 않다면
+                        lastSelectedObject.GetComponent<SelectableObject>().selectMode = SelectMode.DEFAULT;// 이전 선택한 오브젝트를 DEFAULT 처리
+                        selectedObject = null;
+                    }
+                    else
+                    {// 이전에 선택한 오브젝트가 존재하지 않고 
+                        if (hitObject.TryGetComponent<SelectableObject>(out SelectableObject selected))
+                        {// Ray에 부딪힌 오브젝트에 SelectableObject 컴포넌트가 존재한다면 selected 변수에 해당 컴포넌트를 할당하고 조건문 안으로 들임
+                            lastSelectedObject = selected;
+                            selected.OnSelect();//해당 오브젝트의 onSelect() 메서드 수행
+                        }
                     }
                 }
             }
             else
             {// 만약 부딪힌 것이 없다면
-                if (lastHoveredObject != null)
+                if (lastHoveredObject)
                 {// 이전 호버된 오브젝트가 존재한다면
                     if (lastHoveredObject.TryGetComponent<SelectableObject>(out var lastSel))
                     {// 이전 호버된 오브젝트가 존재한다면
@@ -141,16 +161,20 @@ namespace Object
     
         // 현재 마우스의 위치가 Plane1 또는 Plane2인지 판단하는 메서드
         public Transform FindPlaneRoot(Transform hitTransform)
-        {
-            Transform current = hitTransform;
-            while (current != null)
+        { 
+            Transform parent = hitTransform.parent;
+
+            if (parent && parent.name is "Plane1" or "Plane2")
             {
-                if (current.name == "Plane1" || current.name == "Plane2")
-                {//만약 인자로 받은 TransForm이 Plane1또는 Plane2라면 현재 위치 반환.
-                    return current;
-                }
-                current = current.parent;
+                return parent;
             }
+
+            // 자식이 Plane 자체인 경우도 허용하려면 아래 조건도 추가
+            if (hitTransform.name is "Plane1" or "Plane2")
+            {
+                return hitTransform;
+            }
+
             return null;
         }
 
