@@ -42,28 +42,47 @@ namespace Object
             }
         
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {// 만약 ray에 부딪힌것이 있다면
-                Vector3 position = hit.point;// 부딪힌 부분 위치 변수
-                float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트 위치 설정
-                position.y += objectHeight / 2f;// 오브젝트 높이 계산
-                selectedObject.transform.position = position;// 선택한 오브젝트의 위치를 갱신
+            RaycastHit[] hits = Physics.RaycastAll(ray);
+
+            if (hits.Length == 0)
+            {
+                return;
             }
-        
-            Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
-        
-            if (Physics.Raycast(downRay, out RaycastHit downHit))
-            {// 만약 오브젝트 기준으로 부딪히는 부분이 있다면
-                // 부모 평면 업데이트 로직
-                Transform newParent = FindPlaneRoot(downHit.transform);
-                // Debug.Log("새로운 부모??? : " + newParent.name);
-                if (newParent && selectedObject.transform.parent != newParent)
-                {// 만약 새로운 부모가 존재하고 선택한 오브젝트의 부모가 새로운 부모와 다르다면
-                    // Debug.Log("부모 평면 변경됨: " + newParent.name);
-                    selectedObject.transform.SetParent(newParent);// 새로운 부모로 갱신
+            
+            Vector3? newPosition = null;
+            Transform newParent = null;
+
+            foreach (RaycastHit hit in hits)
+            {// 
+                if (hit.transform != selectedObject.transform && newPosition == null)
+                {
+                    Vector3 position = hit.point;
+                    float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;
+                    position.y += objectHeight / 2f;
+                    newPosition = position;
+                }
+                if (hit.transform != selectedObject.transform)
+                {
+                    // 부모 평면은 드래그할 오브젝트를 제외한 첫 번째 plane 후보
+                    Transform candidateParent = FindPlaneRoot(hit.transform);
+                    if (candidateParent)
+                    {
+                        newParent = candidateParent;
+                        break; // plane 후보는 하나만 잡고 종료
+                    }
                 }
             }
+            
+            if (newPosition.HasValue)
+            {
+                selectedObject.transform.position = newPosition.Value;
+            }
+
+            if (newParent && selectedObject.transform.parent != newParent)
+            {
+                selectedObject.transform.SetParent(newParent);
+            }
+            
         }
 
         // 드래그 종료
