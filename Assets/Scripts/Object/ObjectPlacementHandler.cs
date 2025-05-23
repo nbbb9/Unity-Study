@@ -125,41 +125,6 @@ namespace Object
                         selected.OnSelect();
                     }
                 }
-                
-                
-                // if (hitObject != lastHoveredObject)
-                // {//만약 부딪힌 오브젝트가 이전 호버된 오브젝트와 다르다면
-                //     if (lastHoveredObject != null)
-                //     {// 만약 이전 호버된 오브젝트가 존재한다면
-                //         if (lastHoveredObject.TryGetComponent<SelectableObject>(out var lastSel))
-                //         {//
-                //             lastSel.HoverController("deactivate");// 호버 비활성화 처리
-                //         }
-                //     }
-                //
-                //     // 새로 부딪힌 오브젝트 호버 처리
-                //     if (hitObject.TryGetComponent<SelectableObject>(out var newSel))
-                //     {// 새로 부딪힌 오브젝트가 존재한다면
-                //         newSel.HoverController("activate");// 호버 활성화
-                //     }
-                //
-                //     lastHoveredObject = hitObject;// 이전 호버 오브젝트 갱신
-                // }
-                //
-                // // 좌클릭 시 선택 처리
-                // if (Mouse.current.leftButton.wasPressedThisFrame)
-                // {// 부딪힌것이 있는데 마우스 좌클릭하면
-                //     if (hitObject.TryGetComponent<SelectableObject>(out var selected))
-                //     {// 만약 선택한 오브젝트가 존재한다면
-                //         selected.OnSelect();// 선택 상태로 설정
-                //     }
-                // }
-                
-                
-                
-                
-                
-                
             }
             else
             {// 만약 부딪힌 것이 없다면
