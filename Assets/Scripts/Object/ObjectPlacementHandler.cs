@@ -191,7 +191,7 @@ namespace Object
         public Transform FindPlaneRoot(Transform hitTransform)
         {
             Transform parent = hitTransform.parent;// 인자로 받은 트랜스 폼의 부모를 변수화
-
+            
             if (parent && parent.name is "Plane1" or "Plane2")
             {// 만약 부모가 존재하고 이름이 Plane1또는 Plane2라면
                 return parent;// 부모 반환

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Enums;
 using UnityEngine;
@@ -93,16 +94,17 @@ namespace Object
 
             // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {//마우스 움직임에 따른 이동
-                Vector3 position = hit.point;
+            RaycastHit[] hits = Physics.RaycastAll(ray);
+            
+            if (hits.Length > 0)
+            {// 만약 아무것도 부딪힌것이 있다면(공중이 아니라면)
+                Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));// 거리에 따라 정렬
+                Vector3 position = hits[0].point;// 첫 번째 유효한 위치에 previewObject 이동
                 float objectHeight = previewObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트의 높이를 고려하여 바닥면이 지면에 닿도록 보정
                 position.y += objectHeight / 2f;// 살짝 띄우기
                 previewObject.transform.position = position;// 위치를 계산한 만큼 설정(이동)
             }
-        
+            
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {// 마우스 왼쪽 클릭 시 위치(설치)확정
                 // 기존 프리뷰 오브젝트를 설치용으로 전환
@@ -112,9 +114,24 @@ namespace Object
                 placed.GetComponent<Renderer>().material = Resources.Load<Material>("Materials/Default");// 머티리얼 원래대로 복구
                 placed.GetComponent<Collider>().enabled = true;// 콜라이더 활성화
                 placed.name = currentType.ToString();// 이름 설정
-
-                // 부모 설정
-                Transform witchPlane = objectPlacementHandler.FindPlaneRoot(hit.transform);
+                
+                // Plane을 찾기 위한 적절한 hit 찾기
+                Transform witchPlane = null;
+                
+                foreach (RaycastHit hit in hits)
+                {
+                    if (hit.transform == placed.transform)
+                    {
+                        continue; // 자기 자신은 건너뛰기
+                    }
+                    // PlaneRoot를 포함하는 부모 찾기
+                    witchPlane = objectPlacementHandler.FindPlaneRoot(hit.transform);
+                    if (witchPlane != null)
+                    {
+                        break;
+                    }
+                }
+                
                 if (witchPlane)
                 {// 위치값이 존재한다면
                     placed.transform.SetParent(witchPlane);//해당 위치값을 부모로 설정
