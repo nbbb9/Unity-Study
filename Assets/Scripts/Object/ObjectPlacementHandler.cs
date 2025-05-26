@@ -7,7 +7,7 @@ namespace Object
     public class ObjectPlacementHandler : MonoBehaviour
     {
         private GameObject selectedObject;// 선택한 오브젝트
-        private SelectableObject lastSelectedObject;// 마지막으로 선택한 오브젝트
+        private GameObject lastSelectedObject;// 마지막으로 선택한 오브젝트
         private Vector3 originalPosition;// 드래그 시작 시점 위치를 저장할 변수
         private GameObject installWarningPopup;// 설치 오류 팝업
         private GameObject lastHoveredObject;// 이전 호버 오브젝트
@@ -103,24 +103,23 @@ namespace Object
                 selectable.selectMode = SelectMode.DEFAULT;// Default 모드로 변경
             }
         
-            // Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
-
-            if (Physics.Raycast(downRay, out RaycastHit hit))
-            {// 만약 ray에 부딪힌것이 있다면
-                Transform plane = FindPlaneRoot(hit.transform);// 현재 부딪힌 평면 찾기
-                if (!plane)
-                {// 만약 Plane이 null이라면
-                    installWarningPopup.SetActive(true);// 경고 문구 출력
-                    selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
-                }
-                selectedObject.transform.SetParent(plane);// 부모 설정
-            }
-            else
-            {// 만약 ray에 부딪힌 것이 없다면
-                installWarningPopup.SetActive(true);// 경고 문구 출력
-                selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
-            }
+            // Ray downRay = new Ray(selectedObject.transform.position, Vector3.down);// 선택한 오브젝트를 기준으로 아래로 Ray생성.
+            //
+            // if (Physics.Raycast(downRay, out RaycastHit hit))
+            // {// 만약 ray에 부딪힌것이 있다면
+            //     Transform plane = FindPlaneRoot(hit.transform);// 현재 부딪힌 평면 찾기
+            //     if (!plane)
+            //     {// 만약 Plane이 null이라면
+            //         installWarningPopup.SetActive(true);// 경고 문구 출력
+            //         selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
+            //     }
+            //     selectedObject.transform.SetParent(plane);// 부모 설정
+            // }
+            // else
+            // {// 만약 ray에 부딪힌 것이 없다면
+            //     installWarningPopup.SetActive(true);// 경고 문구 출력
+            //     selectedObject.transform.position = originalPosition;// 이전 위치로 되돌림
+            // }
         
             selectedObject = null;// 선택한 오브젝트 제거
         }
@@ -152,16 +151,24 @@ namespace Object
 
                 if (Mouse.current.leftButton.wasPressedThisFrame)
                 {// 만약 마우스 좌클릭을 수행한다면
-                    if (lastSelectedObject && hitObject != lastHoveredObject)
-                    {// 이전에 선택한 오브젝트가 존재하고 이전 Ray에 부딪힌 오브젝트와 같지 않다면
+                    if (lastSelectedObject && hitObject != lastSelectedObject)
+                    {// 이전에 선택한 오브젝트가 존재하고 Ray에 부딪힌 오브젝트와 같지 않다면
                         lastSelectedObject.GetComponent<SelectableObject>().selectMode = SelectMode.DEFAULT;// 이전 선택한 오브젝트를 DEFAULT 처리
-                        selectedObject = null;
+    
+                        selectedObject = hitObject;
+                        lastSelectedObject = null;
+
+                        if (selectedObject.TryGetComponent<SelectableObject>(out var sel))
+                        {
+                            sel.OnSelect(); // 새로 선택한 오브젝트의 OnSelect 호출
+                            lastSelectedObject = selectedObject; // 마지막 선택 오브젝트 갱신
+                        }
                     }
                     else
-                    {// 이전에 선택한 오브젝트가 존재하지 않고 
+                    {// 이전에 선택한 오브젝트가 존재하지 않고
                         if (hitObject.TryGetComponent<SelectableObject>(out SelectableObject selected))
                         {// Ray에 부딪힌 오브젝트에 SelectableObject 컴포넌트가 존재한다면 selected 변수에 해당 컴포넌트를 할당하고 조건문 안으로 들임
-                            lastSelectedObject = selected;
+                            lastSelectedObject = selected.gameObject;
                             selected.OnSelect();//해당 오브젝트의 onSelect() 메서드 수행
                         }
                     }
