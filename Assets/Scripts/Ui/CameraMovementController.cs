@@ -11,9 +11,6 @@ namespace Ui
         public float panSpeed = 5f;// 카메라 패닝 속도
         public float rotateSpeed = 20f; // 회전 속도
         private Camera cam;// 카메라 컴포넌트를 저장할 변수
-        /*
-    Vector3는 3차원, Vector2는 2차원
-    */
         private Vector3 lastMousePosition;// 이전 마우스 위치 저장
         private Vector3 initialPosition;// 초기 카메라 위치 저장
         private Quaternion initialRotation;// 초기 회전 저장

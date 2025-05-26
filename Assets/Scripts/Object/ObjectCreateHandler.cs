@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,10 +7,8 @@ namespace Object
     public class ObjectCreateHandler : MonoBehaviour
     {
         public ObjectPlacementHandler objectPlacementHandler;
-    
         private GameObject previewObject;// 팝업에서 선택한 Object
         public Material previewMaterial;// 설치전 보일 material(붉은색)
-    
         private GameObject selectedObject = null;// 선택한 오브젝트(설치된 걸 선택)
         private bool isPlacing = false;// 설치중 여부
         private bool isDragging = false;// 드래그 여부
@@ -25,7 +21,7 @@ namespace Object
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
 
         private void Start()
-        {
+        {// 시작시 프리팹 미리 load
             cubePrefab = Resources.Load<GameObject>($"Prefabs/Cube"); 
             spherePrefab = Resources.Load<GameObject>($"Prefabs/Sphere");
             capsulePrefab = Resources.Load<GameObject>($"Prefabs/Capsule");
@@ -109,10 +105,8 @@ namespace Object
             if (Physics.Raycast(ray, out hit))
             {//마우스 움직임에 따른 이동
                 Vector3 position = hit.point;
-
                 float objectHeight = previewObject.GetComponent<Renderer>().bounds.size.y;// 오브젝트의 높이를 고려하여 바닥면이 지면에 닿도록 보정
-                position.y += objectHeight / 2f;
-
+                position.y += objectHeight / 2f;// 살짝 띄우기
                 previewObject.transform.position = position;// 위치를 계산한 만큼 설정(이동)
             }
         

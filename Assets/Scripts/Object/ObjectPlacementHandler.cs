@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using SelectMode = Enums.SelectMode;
 
@@ -13,78 +12,77 @@ namespace Object
         private GameObject installWarningPopup;// 설치 오류 팝업
         private GameObject lastHoveredObject;// 이전 호버 오브젝트
 
+        // 선택한 오브젝트 및 기존 위치 Set
         public void SetSelectedObject(GameObject obj)
         {
             selectedObject = obj;
             originalPosition = obj ? obj.transform.position : Vector3.zero;
         }
-    
+        
+        // 경고 문구 팝업 Set
         public void SetInstallWarningPopup(GameObject popup)
         {
             installWarningPopup = popup;
         }
 
+        // 드래그 시작 준비
         public void StartDragging()
-        {
+        {// 드래그가 시작되기 전, 드래그 대상 오브젝트의 원래 위치를 저장(드래그 도중 설치 불가한 위치인 경우 되돌리기 위한 기준점을 설정하기 위해)
             if (selectedObject)
             {// 선택한 오브젝트가 존재한다면
                 originalPosition = selectedObject.transform.position;
             }
         }
-
     
-        // 드래그 시작
+        // 드래그 수행
         public void Drag()
         {
             if (!selectedObject)
-            {
+            {// 선택한 오브젝트가 없다면
                 return;
             }
         
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            RaycastHit[] hits = Physics.RaycastAll(ray);
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());// 카메라 기준 ray 선언
+            RaycastHit[] hits = Physics.RaycastAll(ray);// ray기준 모든 충돌을 감지
 
             if (hits.Length == 0)
-            {
-                return;
+            {// 만약 아무것도 부딪힌것이 없다면.(공중이라면)
+                Debug.Log("공중입니다");
+                return;// 그냥 리턴(드래그 중지)
             }
             
-            Vector3? newPosition = null;
-            Transform newParent = null;
+            Vector3? newPosition = null;//드래그 대상 오브젝트의 새로운 위치 저장 변수
+            Transform newParent = null;// 드래그 대상 오브젝트의 새로운 부모 저장 변수
 
-            foreach (RaycastHit hit in hits)
-            {// 
+            foreach (RaycastHit hit in hits) // => foreach는 향상된 for문 과 같다
+            {// 만약 Ray가 충돌한 모든 오브젝트에 대해 하나씩 처리하기 위한 반복문
                 if (hit.transform != selectedObject.transform && newPosition == null)
-                {
-                    Vector3 position = hit.point;
-                    float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;
-                    position.y += objectHeight / 2f;
-                    newPosition = position;
+                {// Ray가 충돌한 오브젝트가 선택한 오브젝트가 아니고, 아직 새로운 position이 설정되지 않았을 경우
+                    Vector3 position = hit.point;// 충돌 지점의 위치
+                    float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 선택한 오브젝트의 높이
+                    position.y += objectHeight / 2f;// 오브젝트 살짝 띄우기
+                    newPosition = position;// 새로운 위치 갱신
                 }
+                
                 if (hit.transform != selectedObject.transform)
-                {
-                    // 부모 평면은 드래그할 오브젝트를 제외한 첫 번째 plane 후보
-                    Transform candidateParent = FindPlaneRoot(hit.transform);
+                {// 만약 부딪힌 transform이 선택한 오브젝트의 트랜스폼과 다르다면(선택된 오브젝트가 아닌 대상에 대해, 해당 트랜스폼이 부모 Plane이 될 수 있는지)
+                    Transform candidateParent = FindPlaneRoot(hit.transform);// 부모 평면은 드래그할 오브젝트를 제외한 첫 번째 plane 후보
                     if (candidateParent)
-                    {
-                        newParent = candidateParent;
-                        break; // plane 후보는 하나만 잡고 종료
-                    }
-                    else
-                    {
-                        newParent = null;
+                    {// 만약 부모 후보가 있다면
+                        newParent = candidateParent;// 새로운 부모 오브젝트 갱신
+                        break;// plane 후보는 하나만 잡고 종료( 더 이상 다른 후보를 찾지 않기 위해 )
                     }
                 }
             }
             
             if (newPosition.HasValue)
-            {
-                selectedObject.transform.position = newPosition.Value;
+            {// 만약 드래그 대상 오브젝트의 새로운 위치가 값을 가지고 있다면
+                selectedObject.transform.position = newPosition.Value;// 새로운 위치의 값을 선택한 오브젝트의 위치값에 갱신
             }
 
             if (newParent && selectedObject.transform.parent != newParent)
-            {
-                selectedObject.transform.SetParent(newParent);
+            {// 만약 새로운 부모가 존재하고 선택한 오브젝트의 부모와 새로운 부모가 다르다면
+                selectedObject.transform.SetParent(newParent);// 선택한 오브젝트의 부모 갱신
             }
             
         }
@@ -182,19 +180,18 @@ namespace Object
             }
         }
     
-        // 현재 마우스의 위치가 Plane1 또는 Plane2인지 판단하는 메서드
+        // 부모가 Plane1 또는 Plane2인지 판단하는 메서드
         public Transform FindPlaneRoot(Transform hitTransform)
-        { 
-            Transform parent = hitTransform.parent;
+        {
+            Transform parent = hitTransform.parent;// 인자로 받은 트랜스 폼의 부모를 변수화
 
             if (parent && parent.name is "Plane1" or "Plane2")
-            {
-                return parent;
+            {// 만약 부모가 존재하고 이름이 Plane1또는 Plane2라면
+                return parent;// 부모 반환
             }
-
-            // 자식이 Plane 자체인 경우도 허용하려면 아래 조건도 추가
+            
             if (hitTransform.name is "Plane1" or "Plane2")
-            {
+            {// 인자로 받은 트랜스폼이 Plane1 또는 Plane2 그 자체일 때
                 return hitTransform;
             }
 
