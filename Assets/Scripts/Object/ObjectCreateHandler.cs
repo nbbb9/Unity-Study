@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -19,13 +20,17 @@ namespace Object
         public GameObject installWarningPopup;// 설치 오류 팝업
         private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
+        private Dictionary<PrimitiveType, GameObject> prefabMap;
 
         private void Start()
         {// 시작시 프리팹 미리 load
-            cubePrefab = Resources.Load<GameObject>($"Prefabs/Cube"); 
-            spherePrefab = Resources.Load<GameObject>($"Prefabs/Sphere");
-            capsulePrefab = Resources.Load<GameObject>($"Prefabs/Capsule");
-            cylinderPrefab = Resources.Load<GameObject>($"Prefabs/Cylinder");
+            prefabMap = new Dictionary<PrimitiveType, GameObject>
+            {
+                { PrimitiveType.Cube, Resources.Load<GameObject>("Prefabs/Cube") },
+                { PrimitiveType.Sphere, Resources.Load<GameObject>("Prefabs/Sphere") },
+                { PrimitiveType.Capsule, Resources.Load<GameObject>("Prefabs/Capsule") },
+                { PrimitiveType.Cylinder, Resources.Load<GameObject>("Prefabs/Cylinder") },
+            };
         }
 
         private void Update()
@@ -65,26 +70,17 @@ namespace Object
             
             currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
 
-            switch (type.ToString())
+            if (prefabMap.TryGetValue(type, out GameObject prefab))
             {
-                case "Cube":
-                    previewObject = Instantiate(cubePrefab);
-                    break;
-                case "Sphere":
-                    previewObject = Instantiate(spherePrefab);
-                    break;
-                case "Capsule":
-                    previewObject = Instantiate(capsulePrefab);
-                    break;
-                case "Cylinder":
-                    previewObject = Instantiate(cylinderPrefab);
-                    break;
+                previewObject = Instantiate(prefab);//Instantiate는 유니티에서 게임 오브젝트를 복제(생성)할 때 사용하는 함수 >> 프리팹은 설계도이고 Instantiate는 실제 오브젝트를 찍어내는 도장
+                previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
+                previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
+                isPlacing = true;//설치중으로 변경.
             }
-            
-            previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
-            previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
-
-            isPlacing = true;//설치중으로 변경.
+            else
+            {
+                Debug.LogWarning($"{type} 프리팹을 찾을 수 없습니다.");
+            }
         }
 
         // 오브젝트 설치
@@ -109,36 +105,34 @@ namespace Object
         
             if (Mouse.current.leftButton.wasPressedThisFrame)
             {// 마우스 왼쪽 클릭 시 위치(설치)확정
-                GameObject placed = Instantiate(Resources.Load<GameObject>($"Prefabs/{currentType.ToString()}"));
-                placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f;// 살짝 띄워서 시작
-                placed.transform.rotation = previewObject.transform.rotation;
-                placed.name = currentType.ToString();// 현재 타입을 String으로 변환하여 이름으로 설정
-            
-                Transform witchPlane = objectPlacementHandler.FindPlaneRoot(hit.transform);// 마우스의 Ray Hit값을 인자로 넣는다.
+                // 기존 프리뷰 오브젝트를 설치용으로 전환
+                GameObject placed = previewObject;// 설치전 오브젝트를 변수화
+                previewObject = null;// 설치전 오브젝트 null처리
+                isPlacing = false;// 설치중 false
+                placed.GetComponent<Renderer>().material = Resources.Load<Material>("Materials/Default");// 머티리얼 원래대로 복구
+                placed.GetComponent<Collider>().enabled = true;// 콜라이더 활성화
+                placed.name = currentType.ToString();// 이름 설정
+
+                // 부모 설정
+                Transform witchPlane = objectPlacementHandler.FindPlaneRoot(hit.transform);
                 if (witchPlane)
                 {// 위치값이 존재한다면
                     placed.transform.SetParent(witchPlane);//해당 위치값을 부모로 설정
                 }
                 else
-                {// 위치값이 존재하지 않는다면(공중이라면)
+                {// 위치값이 존재하지 않는다면
                     Debug.LogWarning("Plane1 또는 Plane2를 찾을 수 없습니다.");
                 }
-            
-                // Rigidbody rb = placed.AddComponent<Rigidbody>();// 중력을 적용할 수 있도록 Rigidbody 추가
-                // rb.useGravity = true;// 중력 사용
-                // rb.constraints = RigidbodyConstraints.FreezeRotation;// 필요시 회전 제한
-
+                
+                // 선택 가능하게 만들기
                 SelectableObject selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
-                selectable.objectType = currentType; // 오브젝트 타입 직접 지정
+                selectable.objectType = currentType;// 오브젝트 타입 직접 지정
                 selectable.onReselect = (type, pos) =>
                 {
                     selectedObject = placed;// 선택된 오브젝트 등록
                     RePlacing();// 오브젝트 이동
                 };
-
-                Destroy(previewObject);// 프리뷰 제거
-                previewObject = null;// 설치 후 초기화
-                isPlacing = false;// 설치 여부 false
+                
             }
         }
     
