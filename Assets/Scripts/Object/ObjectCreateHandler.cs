@@ -22,7 +22,6 @@ namespace Object
         public Vector3 originalPosition; // 드래그 시작 시점 위치를 저장할 변수
         public GameObject installWarningPopup;// 설치 오류 팝업
         private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
-        private Dictionary<PrimitiveType, GameObject> prefabCache = new();
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
 
         private void Start()

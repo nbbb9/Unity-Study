@@ -70,6 +70,10 @@ namespace Object
                         newParent = candidateParent;
                         break; // plane 후보는 하나만 잡고 종료
                     }
+                    else
+                    {
+                        newParent = null;
+                    }
                 }
             }
             
