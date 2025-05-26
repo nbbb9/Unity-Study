@@ -15,7 +15,7 @@ namespace Object
         private PrimitiveType currentType;// 현재 Object 타입
         private GameObject lastHovered = null;// 이전 호버 오브젝트
         public GameObject infoPopup;// 오브젝트 정보 팝업
-        public Vector3 originalPosition; // 드래그 시작 시점 위치를 저장할 변수
+        public Vector3 originalPosition;// 드래그 시작 시점 위치를 저장할 변수
         public GameObject installWarningPopup;// 설치 오류 팝업
         private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
@@ -55,19 +55,17 @@ namespace Object
         public void SpawnCapsule() => SpawnObjects(PrimitiveType.Capsule);// 캡슐 생성
         public void SpawnCylinder() => SpawnObjects(PrimitiveType.Cylinder);// 원기둥 생성
 
-        // 타입에 맞는 오브젝트 생성 메서드
+        // 오브젝트 생성
         void SpawnObjects(PrimitiveType type)
         {
             if (previewObject)
             {// 만약 이미 선택한 Object가 있다면 제거
                 Destroy(previewObject);
             }
-
-            currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
             
-            string prefabName = type.ToString(); // Cube, Sphere 등 프리팹 이름은 PrimitiveType 이름과 동일하다고 가정
+            currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
 
-            switch (prefabName)
+            switch (type.ToString())
             {
                 case "Cube":
                     previewObject = Instantiate(cubePrefab);
@@ -83,7 +81,6 @@ namespace Object
                     break;
             }
             
-            // previewObject = GameObject.CreatePrimitive(type);// 타입에 맞는 오브젝트 생성
             previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
             previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
 
@@ -111,9 +108,7 @@ namespace Object
             }
         
             if (Mouse.current.leftButton.wasPressedThisFrame)
-            {// 마우스 왼쪽 클릭 시 확정
-                // Debug.Log("오브젝트 설치!");
-                // GameObject placed = GameObject.CreatePrimitive(currentType);// 현재 타입을 적용한 오브젝트 생성 후 설치
+            {// 마우스 왼쪽 클릭 시 위치(설치)확정
                 GameObject placed = Instantiate(Resources.Load<GameObject>($"Prefabs/{currentType.ToString()}"));
                 placed.transform.position = previewObject.transform.position + Vector3.up * 0.5f;// 살짝 띄워서 시작
                 placed.transform.rotation = previewObject.transform.rotation;
@@ -147,32 +142,7 @@ namespace Object
             }
         }
     
-    
-        // 기존 오브젝트를 선택 후 이동을 위한 준비
-        void RePlacing()
-        {
-            if (selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.JUSTSELECT || selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.DEFAULT)
-            {
-                isDragging = false;// 드래그 상태 false
-            }
-            else if (selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.MOVE)
-            {
-                isDragging = true;// 드래그 상태 true
-            }
-            // Debug.Log("이동 준비 상태");
-            isPlacing = false;// 새로 생성하지 않음
-            
-            if (selectedObject)
-            {// 선택한 오브젝트가 존재한다면
-                originalPosition = selectedObject.transform.position;// 시작 위치 저장
-                objectPlacementHandler.SetSelectedObject(selectedObject);// 선택한 오브젝트 set
-                objectPlacementHandler.SetInstallWarningPopup(installWarningPopup);// 경고 팝업 set
-                objectPlacementHandler.StartDragging();// 드래그 시작
-            }
-        
-        }
-  
-        // 현재 선택된 오브젝트 삭제
+        // 오브젝트 삭제
         public void DeleteSelectedObject()
         {
             if (selectedObject)
@@ -190,6 +160,30 @@ namespace Object
                 Debug.LogWarning("삭제할 선택된 오브젝트가 없습니다.");
             }
         }
-    
+        
+        // 기존 오브젝트를 선택 후 이동을 위한 준비
+        void RePlacing()
+        {
+            
+            if (selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.MOVE)
+            {
+                isDragging = true;// 드래그 상태 true
+            }
+            else
+            {
+                isDragging = false;// 드래그 상태 false
+            }
+
+            isPlacing = false;// 새로 생성하지 않음
+            
+            if (selectedObject)
+            {// 선택한 오브젝트가 존재한다면
+                originalPosition = selectedObject.transform.position;// 시작 위치 저장
+                objectPlacementHandler.SetSelectedObject(selectedObject);// 선택한 오브젝트 set
+                objectPlacementHandler.SetInstallWarningPopup(installWarningPopup);// 경고 팝업 set
+                objectPlacementHandler.StartDragging();// 드래그 시작
+            }
+        }
+        
     }
 }

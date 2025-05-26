@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// 유니티의 UI조작을 위해 꼭 필요한 엔진
-
 namespace Ui
 {
     public class PopupHandler : MonoBehaviour 
