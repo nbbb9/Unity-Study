@@ -40,27 +40,7 @@ namespace Object
                 originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장
             }
         }
-
-        void Update()
-        {
-            Vector3 pos = transform.position;// 3차원 포지션 변수 선언
-            // x와 z의 구역 제한
-            pos.x = Mathf.Clamp(pos.x, -11.5f, 11.5f);
-            pos.z = Mathf.Clamp(pos.z, -7.5f, 7.5f);
-            pos.y = 1.6f;// Plane 바로 위로 고정
-            transform.position = new Vector3(pos.x, pos.y, pos.z);// 제한 위치 설정
-           
-            if ((selectMode == SelectMode.JUSTSELECT && rend && rend.material.color != HoverColor) ||
-                (selectMode == SelectMode.HOVERED && rend && rend.material.color != HoverColor))
-            {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
-                rend.material.color = HoverColor;
-            }
-            else if (selectMode == SelectMode.DEFAULT && rend && rend.material.color != originalColor)
-            { // 그 외 모드에서는 원래 색상 복원
-                rend.material.color = originalColor;
-            }
-        }
-
+        
         // 호버 컨트롤러
         public void HoverController(String type)
         {
@@ -105,6 +85,16 @@ namespace Object
                 case SelectMode.MOVE:
                     selectMode = SelectMode.JUSTSELECT;
                     break;
+            }
+            
+            if ((selectMode == SelectMode.JUSTSELECT && rend && rend.material.color != HoverColor) ||
+                (selectMode == SelectMode.HOVERED && rend && rend.material.color != HoverColor))
+            {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
+                rend.material.color = HoverColor;
+            }
+            else if (selectMode == SelectMode.DEFAULT && rend && rend.material.color != originalColor)
+            { // 그 외 모드에서는 원래 색상 복원
+                rend.material.color = originalColor;
             }
 
             Debug.Log("현재 모드 : " + selectMode);
