@@ -49,7 +49,7 @@ namespace Object
             
             // 만약 아무것도 부딪힌것이 없다면.(공중이라면)
             if (hits.Length == 0) return;// 그냥 리턴(드래그 중지)
-            
+
             Vector3? newPosition = null;//드래그 대상 오브젝트의 새로운 위치 저장 변수
             Transform newParent = null;// 드래그 대상 오브젝트의 새로운 부모 저장 변수
 

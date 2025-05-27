@@ -20,6 +20,7 @@ namespace Object
         public SelectMode selectMode;// 오브젝트 선택 모드 초기값
         
         private static readonly Color HoverColor = Color.yellow;// 호버 색상 
+        private static readonly Color HoverColor2 = Color.blue;// 호버 색상2 - blue
         private Color originalColor;//기존 색상(회색)
     
         private void Start()
@@ -43,7 +44,7 @@ namespace Object
             selectMode = SelectMode.DEFAULT;// 선택 모드 초기값 '기본'
             
             rend = GetComponent<Renderer>();// 현재 오브젝트에 붙어 있는 Renderder 컴포넌트를 가져와서 rend에 저장
-            if (rend) originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장}
+            if (rend) originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장
         }
         
         // 호버모드 컨트롤러
@@ -88,6 +89,8 @@ namespace Object
 
             Debug.Log("현재 모드 : " + selectMode);
             
+            UpdateColor();
+            
             if (onReselect != null)
             {// 
                 onReselect.Invoke(objectType, transform.position); // 이름 대신 타입 필드 사용
@@ -99,8 +102,6 @@ namespace Object
                 nameText.text = $"{gameObject.name}";
                 typeText.text = $"{objectType}";
             }
-
-            UpdateColor();
         }
         
         // 색상 변경
@@ -108,9 +109,9 @@ namespace Object
         {
             if (!rend) return;
 
-            if (selectMode == SelectMode.JUSTSELECT || selectMode == SelectMode.HOVERED)
+            if (selectMode == SelectMode.JUSTSELECT)
             {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
-                rend.material.color = HoverColor;
+                rend.material.color = HoverColor2;
             }
             else
             {// 그 외 모드에서는 원래 색상 복원

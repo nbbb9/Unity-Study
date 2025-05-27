@@ -6,7 +6,7 @@
             "id": "3836b785-4076-4a4a-b26f-bc8348439954",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "a",
                     "type": "Button",
                     "id": "0cd8d448-1bbd-407d-b925-177dc390459b",
                     "expectedControlType": "",
@@ -19,11 +19,11 @@
                 {
                     "name": "",
                     "id": "3a358342-026d-4ec3-b972-82204c63835a",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Keyboard>/a",
                     "interactions": "Hold",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "a",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

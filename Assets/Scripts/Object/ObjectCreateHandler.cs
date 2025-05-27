@@ -47,7 +47,7 @@ namespace Object
                 objectPlacementHandler.DetectHoverAndSelect();// 호버 감지
                 
                 if (selectedObject && Mouse.current.rightButton.wasPressedThisFrame)
-                {
+                {// 선택한 오브젝트가 존재하고, 마우스 우클릭을 수행하면
                     float angle = Keyboard.current.leftShiftKey.isPressed ? -45f : 45f;// shift를 누르고 우클릭하면 반대로
                     // StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.up, angle));// y축 기준 회전
                     StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.right, angle));// X축 기준 회전
