@@ -9,11 +9,13 @@ namespace Object
     public class ObjectCreateHandler : MonoBehaviour
     {
         public ObjectPlacementHandler objectPlacementHandler;
+        
         private GameObject previewObject;// 팝업에서 선택한 Object
         public Material previewMaterial;// 설치전 보일 material(붉은색)
         private GameObject selectedObject = null;// 선택한 오브젝트(설치된 걸 선택)
         private bool isPlacing = false;// 설치중 여부
         private bool isDragging = false;// 드래그 여부
+        private bool isRotating = false;// 회전 여부
         private PrimitiveType currentType;// 현재 Object 타입
         private GameObject lastHovered = null;// 이전 호버 오브젝트
         public GameObject infoPopup;// 오브젝트 정보 팝업
@@ -43,6 +45,14 @@ namespace Object
             else
             {
                 objectPlacementHandler.DetectHoverAndSelect();// 호버 감지
+                
+                if (selectedObject && Mouse.current.rightButton.wasPressedThisFrame)
+                {
+                    float angle = Keyboard.current.leftShiftKey.isPressed ? -45f : 45f;// shift를 누르고 우클릭하면 반대로
+                    // StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.up, angle));// y축 기준 회전
+                    StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.right, angle));// X축 기준 회전
+                    // StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.forward, angle));// z축 기준 회전
+                }
 
                 if (isDragging && selectedObject)
                 {// 드래그 중이고 선택한 오브젝트가 있다면
@@ -144,7 +154,7 @@ namespace Object
                 // 선택 가능하게 만들기
                 SelectableObject selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
                 selectable.objectType = currentType;// 오브젝트 타입 직접 지정
-                selectable.onReselect = (type, pos) =>
+                selectable.onReselect = (type, position) =>
                 {
                     selectedObject = placed;// 선택된 오브젝트 등록
                     RePlacing();// 오브젝트 이동

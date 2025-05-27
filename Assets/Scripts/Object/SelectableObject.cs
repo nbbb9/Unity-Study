@@ -7,21 +7,26 @@ namespace Object
 {
     public class SelectableObject : MonoBehaviour 
     {
-        private Color originalColor;//기존 색상(회색)
         private Renderer rend;
-        public Action<PrimitiveType, Vector3> onReselect;// ?????????????????????????????????????????????????????????
-        public PrimitiveType objectType;
+        
+        public Action<PrimitiveType, Vector3> onReselect;// ??????????????
+        
+        public PrimitiveType objectType;// 현재 오브젝트의 타입
+        
         public GameObject infoPopup;// 선택한 ObjectPopup
         public TextMeshProUGUI nameText;// O*N 아래 Text
         public TextMeshProUGUI typeText;// O*T 아래 Text
-        public SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
+        
+        public SelectMode selectMode;// 오브젝트 선택 모드 초기값
+        
         private static readonly Color HoverColor = Color.yellow;// 호버 색상 
+        private Color originalColor;//기존 색상(회색)
     
         private void Start()
         {
-            GameObject canvas = GameObject.Find("Canvas");// 게임 오브젝트에서 찾기
-            Transform infoPopupTransform = canvas.transform.Find("ObjectInfoPopup");// 게임 오브젝트에서 찾기
-            Transform objectInfo = canvas.transform.Find("ObjectInfoPopup/GameObjectInfo");// 게임 오브젝트에서 찾기
+            GameObject canvas = GameObject.Find("Canvas");
+            Transform infoPopupTransform = canvas.transform.Find("Popup/ObjectInfoPopup");
+            Transform objectInfo = canvas.transform.Find("Popup/ObjectInfoPopup/GameObjectInfo");
         
             if (objectInfo)
             {//오브젝트 정보창이 존재한다면
@@ -34,15 +39,15 @@ namespace Object
                     typeText = typeObj.GetComponent<TextMeshProUGUI>();// 오브젝트 타입 할당
                 }
             }
+
+            selectMode = SelectMode.DEFAULT;// 선택 모드 초기값 '기본'
+            
             rend = GetComponent<Renderer>();// 현재 오브젝트에 붙어 있는 Renderder 컴포넌트를 가져와서 rend에 저장
-            if (rend)
-            {// rend가 존재할 경우
-                originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장
-            }
+            if (rend) originalColor = rend.material.color;// 현재 오브젝트의 머터리얼에서 색상을 가져와 originalColor에 저장}
         }
         
-        // 호버 컨트롤러
-        public void HoverController(String type)
+        // 호버모드 컨트롤러
+        public void HoverModeController(String type)
         {
             if (!rend) return;// 
             
@@ -51,18 +56,12 @@ namespace Object
             switch (type)
             {// 타입에 따른 호버 활성, 비활성
                 case "activate":
-                    if (!isJustSelect)
-                    {
-                        selectMode = SelectMode.HOVERED;
-                    }
+                    if (!isJustSelect) selectMode = SelectMode.HOVERED;
                     rend.material.color = HoverColor;
                     break;
 
                 case "deactivate":
-                    if (!isJustSelect)
-                    {
-                        selectMode = SelectMode.DEFAULT;
-                    }
+                    if (!isJustSelect) selectMode = SelectMode.DEFAULT;
                     rend.material.color = originalColor;
                     break;
             }
@@ -72,7 +71,7 @@ namespace Object
         public void OnSelect()
         {
             switch (selectMode)
-            {// 선택 모드 전환 처리
+            {// 선택 모드 전환
                 case SelectMode.DEFAULT:
                     selectMode = SelectMode.JUSTSELECT;
                     break;
@@ -85,16 +84,6 @@ namespace Object
                 case SelectMode.MOVE:
                     selectMode = SelectMode.JUSTSELECT;
                     break;
-            }
-            
-            if ((selectMode == SelectMode.JUSTSELECT && rend && rend.material.color != HoverColor) ||
-                (selectMode == SelectMode.HOVERED && rend && rend.material.color != HoverColor))
-            {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
-                rend.material.color = HoverColor;
-            }
-            else if (selectMode == SelectMode.DEFAULT && rend && rend.material.color != originalColor)
-            { // 그 외 모드에서는 원래 색상 복원
-                rend.material.color = originalColor;
             }
 
             Debug.Log("현재 모드 : " + selectMode);
@@ -109,6 +98,23 @@ namespace Object
                 infoPopup.SetActive(true);
                 nameText.text = $"{gameObject.name}";
                 typeText.text = $"{objectType}";
+            }
+
+            UpdateColor();
+        }
+        
+        // 색상 변경
+        private void UpdateColor()
+        {
+            if (!rend) return;
+
+            if (selectMode == SelectMode.JUSTSELECT || selectMode == SelectMode.HOVERED)
+            {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
+                rend.material.color = HoverColor;
+            }
+            else
+            {// 그 외 모드에서는 원래 색상 복원
+                rend.material.color = originalColor;
             }
         }
         

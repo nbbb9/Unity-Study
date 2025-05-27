@@ -20,7 +20,7 @@
                     "name": "",
                     "id": "3a358342-026d-4ec3-b972-82204c63835a",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "New action",
