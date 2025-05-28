@@ -20,7 +20,6 @@ namespace Object
         public SelectMode selectMode;// 오브젝트 선택 모드 초기값
         
         private static readonly Color HoverColor = Color.yellow;// 호버 색상 
-        private static readonly Color HoverColor2 = Color.blue;// 호버 색상2 - blue
         private Color originalColor;//기존 색상(회색)
     
         private void Start()
@@ -62,14 +61,8 @@ namespace Object
                     break;
 
                 case "deactivate":
-                    if (isJustSelect)
-                    {
-                        selectMode = SelectMode.JUSTSELECT;
-                    }
-                    else
-                    {
-                        rend.material.color = originalColor;
-                    }
+                    if (isJustSelect) selectMode = SelectMode.JUSTSELECT;
+                    else rend.material.color = originalColor;
                     break;
             }
         }
