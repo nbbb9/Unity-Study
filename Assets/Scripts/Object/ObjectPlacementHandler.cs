@@ -129,7 +129,8 @@ namespace Object
                     if (lastSelectedObject && hitObject != lastSelectedObject)
                     {// 이전에 선택한 오브젝트가 존재하고 Ray에 부딪힌 오브젝트와 같지 않다면
                         lastSelectedObject.GetComponent<SelectableObject>().selectMode = SelectMode.DEFAULT;// 이전 선택한 오브젝트를 DEFAULT 처리
-    
+                        lastSelectedObject.GetComponent<Renderer>().material.color = Color.gray5;
+                            
                         selectedObject = hitObject;
                         lastSelectedObject = null;
 

@@ -62,8 +62,14 @@ namespace Object
                     break;
 
                 case "deactivate":
-                    if (!isJustSelect) selectMode = SelectMode.DEFAULT;
-                    rend.material.color = originalColor;
+                    if (isJustSelect)
+                    {
+                        selectMode = SelectMode.JUSTSELECT;
+                    }
+                    else
+                    {
+                        rend.material.color = originalColor;
+                    }
                     break;
             }
         }
@@ -75,21 +81,21 @@ namespace Object
             {// 선택 모드 전환
                 case SelectMode.DEFAULT:
                     selectMode = SelectMode.JUSTSELECT;
+                    rend.material.color = HoverColor;
                     break;
                 case SelectMode.HOVERED:
                     selectMode = SelectMode.JUSTSELECT;
+                    rend.material.color = HoverColor;
                     break;
                 case SelectMode.JUSTSELECT:
                     selectMode = SelectMode.MOVE;
+                    rend.material.color = HoverColor;
                     break;
                 case SelectMode.MOVE:
                     selectMode = SelectMode.JUSTSELECT;
+                    rend.material.color = HoverColor;
                     break;
             }
-
-            Debug.Log("현재 모드 : " + selectMode);
-            
-            UpdateColor();
             
             if (onReselect != null)
             {// 
@@ -101,21 +107,6 @@ namespace Object
                 infoPopup.SetActive(true);
                 nameText.text = $"{gameObject.name}";
                 typeText.text = $"{objectType}";
-            }
-        }
-        
-        // 색상 변경
-        private void UpdateColor()
-        {
-            if (!rend) return;
-
-            if (selectMode == SelectMode.JUSTSELECT)
-            {// JUSTSELECT 모드일 경우와 HOVERED 모드일 경우 노란색 유지
-                rend.material.color = HoverColor2;
-            }
-            else
-            {// 그 외 모드에서는 원래 색상 복원
-                rend.material.color = originalColor;
             }
         }
         

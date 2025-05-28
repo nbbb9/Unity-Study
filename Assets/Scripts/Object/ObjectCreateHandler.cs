@@ -9,19 +9,22 @@ namespace Object
     public class ObjectCreateHandler : MonoBehaviour
     {
         public ObjectPlacementHandler objectPlacementHandler;
-        
-        private GameObject previewObject;// 팝업에서 선택한 Object
+        public GameObject installWarningPopup;// 설치 오류 팝업
         public Material previewMaterial;// 설치전 보일 material(붉은색)
+        public GameObject infoPopup;// 오브젝트 정보 팝업
+
+        private GameObject previewObject;// 팝업에서 선택한 Object
+        private PrimitiveType currentType;// 현재 Object 타입
         private GameObject selectedObject = null;// 선택한 오브젝트(설치된 걸 선택)
+        private GameObject lastHovered = null;// 이전 호버 오브젝트
+        private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
+        
         private bool isPlacing = false;// 설치중 여부
         private bool isDragging = false;// 드래그 여부
         private bool isRotating = false;// 회전 여부
-        private PrimitiveType currentType;// 현재 Object 타입
-        private GameObject lastHovered = null;// 이전 호버 오브젝트
-        public GameObject infoPopup;// 오브젝트 정보 팝업
+        
         public Vector3 originalPosition;// 드래그 시작 시점 위치를 저장할 변수
-        public GameObject installWarningPopup;// 설치 오류 팝업
-        private SelectMode selectMode = SelectMode.DEFAULT;// 오브젝트 선택 모드 초기값
+        
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
         private Dictionary<PrimitiveType, GameObject> prefabMap;
 
