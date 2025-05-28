@@ -26,16 +26,16 @@ namespace Object
         public Vector3 originalPosition;// 드래그 시작 시점 위치를 저장할 변수
         
         private GameObject cubePrefab, spherePrefab, capsulePrefab, cylinderPrefab;// 프리팹 오브젝트
-        private Dictionary<PrimitiveType, GameObject> prefabMap;
+        private Dictionary<String, GameObject> prefabMap;
 
         private void Start()
         {// 시작시 프리팹 미리 load
-            prefabMap = new Dictionary<PrimitiveType, GameObject>
+            prefabMap = new Dictionary<String, GameObject>
             {
-                { PrimitiveType.Cube, Resources.Load<GameObject>("Prefabs/Cube") },
-                { PrimitiveType.Sphere, Resources.Load<GameObject>("Prefabs/Sphere") },
-                { PrimitiveType.Capsule, Resources.Load<GameObject>("Prefabs/Capsule") },
-                { PrimitiveType.Cylinder, Resources.Load<GameObject>("Prefabs/Cylinder") },
+                { "Cube", Resources.Load<GameObject>("Prefabs/Cube") },
+                { "Sphere", Resources.Load<GameObject>("Prefabs/Sphere") },
+                { "Capsule", Resources.Load<GameObject>("Prefabs/Capsule") },
+                { "Cylinder", Resources.Load<GameObject>("Prefabs/Cylinder") },
             };
         }
 
@@ -56,12 +56,12 @@ namespace Object
                     StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.right, angle));// X축 기준 회전
                     // StartCoroutine(objectPlacementHandler.RotateSelectedObject(Vector3.forward, angle));// z축 기준 회전
                 }
-
+        
                 if (isDragging && selectedObject)
                 {// 드래그 중이고 선택한 오브젝트가 있다면
                     objectPlacementHandler.Drag();// 드래그 시작
                 }
-
+        
                 if (isDragging && Mouse.current.leftButton.wasReleasedThisFrame)
                 {// 드래그 중이고 마우스 좌클릭이 풀어진다면
                     objectPlacementHandler.EndDragging();// 드래그 종료
@@ -69,41 +69,29 @@ namespace Object
             }
         }
         
-        public void SpawnCube() => SpawnObjects(PrimitiveType.Cube);// 정육면체 생성
-        public void SpawnSphere() => SpawnObjects(PrimitiveType.Sphere);// 구 생성
-        public void SpawnCapsule() => SpawnObjects(PrimitiveType.Capsule);// 캡슐 생성
-        public void SpawnCylinder() => SpawnObjects(PrimitiveType.Cylinder);// 원기둥 생성
-
         // 오브젝트 생성
-        void SpawnObjects(PrimitiveType type)
+        public void SpawnObjects(String type)
         {
-            if (previewObject)
-            {// 만약 이미 선택한 Object가 있다면 제거
-                Destroy(previewObject);
-            }
+            if (previewObject) Destroy(previewObject);// 만약 이미 선택한 Object가 있다면 제거
             
-            currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
+            // currentType = type;// 위치 확정 전 보여질 타입을 지정(마우스를 따라다니면서 보여질 타입 지정)
 
+            var obj = prefabMap[type];
+                
             if (prefabMap.TryGetValue(type, out GameObject prefab))
             {
                 previewObject = Instantiate(prefab);//Instantiate는 유니티에서 게임 오브젝트를 복제(생성)할 때 사용하는 함수 >> 프리팹은 설계도이고 Instantiate는 실제 오브젝트를 찍어내는 도장
-                previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
-                previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
+            //     previewObject.GetComponent<MeshRenderer>().material = previewMaterial;// 투명한 붉은색 머티리얼 생성 및 적용
+            //     previewObject.GetComponent<Collider>().enabled = false;// 콜라이더를 통해 물리 적용
                 isPlacing = true;//설치중으로 변경.
             }
-            else
-            {
-                Debug.LogWarning($"{type} 프리팹을 찾을 수 없습니다.");
-            }
+            else Debug.LogWarning($"{type} 프리팹을 찾을 수 없습니다.");
         }
 
         // 오브젝트 설치
         void FixObject()
         {
-            if (!isPlacing || !previewObject)
-            {// 설치중이 아니거나 생성한 오브젝트가 존재하지 않으면
-                return;
-            }
+            if (!isPlacing || !previewObject)  return;// 설치중이 아니거나 생성한 오브젝트가 존재하지 않으면
 
             // 마우스 위치에서 Ray를 쏴서 평면과 충돌하는 지점 찾기
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -133,34 +121,25 @@ namespace Object
                 
                 foreach (RaycastHit hit in hits)
                 {
-                    if (hit.transform == placed.transform)
-                    {
-                        continue; // 자기 자신은 건너뛰기
-                    }
+                    if (hit.transform == placed.transform) continue; // 자기 자신은 건너뛰기
                     // PlaneRoot를 포함하는 부모 찾기
                     witchPlane = objectPlacementHandler.FindPlaneRoot(hit.transform);
-                    if (witchPlane != null)
-                    {
-                        break;
-                    }
+                    if (witchPlane != null) break;
                 }
                 
-                if (witchPlane)
-                {// 위치값이 존재한다면
-                    placed.transform.SetParent(witchPlane);//해당 위치값을 부모로 설정
-                }
-                else
-                {// 위치값이 존재하지 않는다면
-                    Debug.LogWarning("Plane1 또는 Plane2를 찾을 수 없습니다.");
-                }
+                if (witchPlane) placed.transform.SetParent(witchPlane);// 위치값이 존재한다면 해당 위치값을 부모로 설정
+                else Debug.LogWarning("Plane1 또는 Plane2를 찾을 수 없습니다.");// 위치값이 존재하지 않는다면
                 
                 // 선택 가능하게 만들기
                 SelectableObject selectable = placed.AddComponent<SelectableObject>();// 설치한 오브젝트를 선택 가능한 컴포넌트 추가
+                
                 selectable.objectType = currentType;// 오브젝트 타입 직접 지정
                 selectable.onReselect = (type, position) =>
                 {
+                    Debug.Log(" 111 ");
                     selectedObject = placed;// 선택된 오브젝트 등록
-                    RePlacing();// 오브젝트 이동
+                    Debug.Log(" 222 ");
+                    objectPlacementHandler.RePlacing(selectedObject);// 오브젝트 이동
                 };
                 
             }
@@ -173,40 +152,9 @@ namespace Object
             {// 만약 선택한 오브젝트가 존재한다면
                 Destroy(selectedObject);// 오브젝트 제거
                 selectedObject = null;// 참조 초기화
-
-                if (infoPopup)
-                {// 만약 정보 팝업이 존재한다면
-                    infoPopup.SetActive(false);// 정보 팝업 숨김
-                }
+                if (infoPopup) infoPopup.SetActive(false);// 만약 정보 팝업이 존재한다면 정보 팝업 숨김
             }
-            else
-            {// 선택한 오브젝트가 없다면
-                Debug.LogWarning("삭제할 선택된 오브젝트가 없습니다.");
-            }
-        }
-        
-        // 기존 오브젝트를 선택 후 이동을 위한 준비
-        void RePlacing()
-        {
-            
-            if (selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.MOVE)
-            {
-                isDragging = true;// 드래그 상태 true
-            }
-            else
-            {
-                isDragging = false;// 드래그 상태 false
-            }
-
-            isPlacing = false;// 새로 생성하지 않음
-            
-            if (selectedObject)
-            {// 선택한 오브젝트가 존재한다면
-                originalPosition = selectedObject.transform.position;// 시작 위치 저장
-                objectPlacementHandler.SetSelectedObject(selectedObject);// 선택한 오브젝트 set
-                objectPlacementHandler.SetInstallWarningPopup(installWarningPopup);// 경고 팝업 set
-                objectPlacementHandler.StartDragging();// 드래그 시작
-            }
+            else Debug.LogWarning("삭제할 선택된 오브젝트가 없습니다.");
         }
         
     }

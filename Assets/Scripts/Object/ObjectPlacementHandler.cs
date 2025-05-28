@@ -13,9 +13,10 @@ namespace Object
         private GameObject installWarningPopup;// 설치 오류 팝업
         private GameObject lastHoveredObject;// 이전 호버 오브젝트
         
+        private bool isPlacing;// 설치중 여부
+        private bool isDragging;// 드래그 여부
         private bool isRotating = false; // 회전 중 여부
         public float rotationDuration = 0.5f; // 회전 애니메이션 시간(부드러운 회전에 걸리는 시간) - 0.3초
-
 
         // 선택한 오브젝트 및 기존 위치 Set
         public void SetSelectedObject(GameObject obj)
@@ -29,14 +30,28 @@ namespace Object
         {
             installWarningPopup = popup;
         }
+        
+        // 기존 오브젝트를 선택 후 이동을 위한 준비
+        public void RePlacing(GameObject selectedObject)
+        {
+            if (selectedObject.GetComponent<SelectableObject>().selectMode == SelectMode.MOVE) isDragging = true;// 드래그 상태 true
+            else isDragging = false;// 드래그 상태 false
+            
+            isPlacing = false;// 새로 생성하지 않음
+            
+            if (selectedObject)
+            {// 선택한 오브젝트가 존재한다면
+                originalPosition = selectedObject.transform.position;// 시작 위치 저장
+                SetSelectedObject(selectedObject);// 선택한 오브젝트 set
+                SetInstallWarningPopup(installWarningPopup);// 경고 팝업 set
+                StartDragging();// 드래그 시작
+            }
+        }
 
         // 드래그 시작 준비
         public void StartDragging()
         {// 드래그가 시작되기 전, 드래그 대상 오브젝트의 원래 위치를 저장(드래그 도중 설치 불가한 위치인 경우 되돌리기 위한 기준점을 설정하기 위해)
-            if (selectedObject)
-            {// 선택한 오브젝트가 존재한다면
-                originalPosition = selectedObject.transform.position;
-            }
+            if (selectedObject) originalPosition = selectedObject.transform.position;// 선택한 오브젝트가 존재한다면
         }
     
         // 드래그 수행
@@ -46,31 +61,34 @@ namespace Object
         
             Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());// 카메라 기준 ray 선언
             RaycastHit[] hits = Physics.RaycastAll(ray);// ray기준 모든 충돌을 감지
-            
-            // 만약 아무것도 부딪힌것이 없다면.(공중이라면)
-            if (hits.Length == 0) return;// 그냥 리턴(드래그 중지)
+            if (hits.Length == 0) return;// 만약 아무것도 부딪힌것이 없다면(공중이라면) 그냥 리턴(드래그 중지)
 
             Vector3? newPosition = null;//드래그 대상 오브젝트의 새로운 위치 저장 변수
             Transform newParent = null;// 드래그 대상 오브젝트의 새로운 부모 저장 변수
+            
+            // Renderer 캐싱
+            Renderer selectedRenderer = selectedObject.GetComponent<Renderer>();
+            float objectHeight = selectedRenderer.bounds.size.y;
 
             foreach (RaycastHit hit in hits) // => foreach는 향상된 for문 과 같다
             {// 만약 Ray가 충돌한 모든 오브젝트에 대해 하나씩 처리하기 위한 반복문
-                if (hit.transform != selectedObject.transform && newPosition == null)
-                {// Ray가 충돌한 오브젝트가 선택한 오브젝트가 아니고, 아직 새로운 position이 설정되지 않았을 경우
+                
+                if (hit.transform == selectedObject.transform) continue;// 오브젝트와의 충돌은 무시
+
+                if (!newPosition.HasValue)
+                {// 새로운 위치 설정(가장 처음 유효한 히트 지점만)
                     Vector3 position = hit.point;// 충돌 지점의 위치
-                    float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 선택한 오브젝트의 높이
+                    // float objectHeight = selectedObject.GetComponent<Renderer>().bounds.size.y;// 선택한 오브젝트의 높이
                     position.y += objectHeight / 2f;// 오브젝트 살짝 띄우기
                     newPosition = position;// 새로운 위치 갱신
                 }
                 
-                if (hit.transform != selectedObject.transform)
-                {// 만약 부딪힌 transform이 선택한 오브젝트의 트랜스폼과 다르다면(선택된 오브젝트가 아닌 대상에 대해, 해당 트랜스폼이 부모 Plane이 될 수 있는지)
-                    Transform candidateParent = FindPlaneRoot(hit.transform);// 부모 평면은 드래그할 오브젝트를 제외한 첫 번째 plane 후보
-                    if (candidateParent)
-                    {// 만약 부모 후보가 있다면
-                        newParent = candidateParent;// 새로운 부모 오브젝트 갱신
-                        break;// plane 후보는 하나만 잡고 종료( 더 이상 다른 후보를 찾지 않기 위해 )
-                    }
+                Transform candidateParent = FindPlaneRoot(hit.transform);// 부모 평면은 드래그할 오브젝트를 제외한 첫 번째 plane 후보
+                
+                if (candidateParent)
+                {// 만약 부모 후보가 있다면
+                    newParent = candidateParent;// 새로운 부모 오브젝트 갱신
+                    break;// plane 후보는 하나만 잡고 종료( 더 이상 다른 후보를 찾지 않기 위해 )
                 }
             }
             
@@ -90,12 +108,15 @@ namespace Object
         public void EndDragging()
         {
             if (!selectedObject) return;
+            
             SelectableObject selectable = selectedObject.GetComponent<SelectableObject>();// 선택한 오브젝트의 컴포넌트 세팅
+            
             if (selectable && selectable.infoPopup)
             {// 선택한 오브젝트가 존재하고 정보 팝업이 존재한다면
                 selectable.infoPopup.SetActive(false);// 정보 팝업 비활성화
                 selectable.selectMode = SelectMode.DEFAULT;// Default 모드로 변경
             }
+            
             selectedObject = null;// 선택한 오브젝트 제거
         }
     
@@ -123,14 +144,13 @@ namespace Object
                     newSel.HoverModeController("activate");// 해당 오브젝트의 호버를 활성화
                     lastHoveredObject = hitObject;// 마지막 호버 오브젝트 갱신
                 }
-                // --- 여기까지가 호버고 아래는 사실상 선택 ---
+                // --- 여기까지가 호버고 아래는 사실상 선택 --- //
                 if (Mouse.current.leftButton.wasPressedThisFrame)
                 {// 만약 마우스 좌클릭을 수행한다면
                     if (lastSelectedObject && hitObject != lastSelectedObject)
                     {// 이전에 선택한 오브젝트가 존재하고 Ray에 부딪힌 오브젝트와 같지 않다면
                         lastSelectedObject.GetComponent<SelectableObject>().selectMode = SelectMode.DEFAULT;// 이전 선택한 오브젝트를 DEFAULT 처리
                         lastSelectedObject.GetComponent<Renderer>().material.color = Color.gray5;
-                            
                         selectedObject = hitObject;
                         lastSelectedObject = null;
 
@@ -168,15 +188,9 @@ namespace Object
         {
             Transform parent = hitTransform.parent;// 인자로 받은 트랜스 폼의 부모를 변수화
             
-            if (parent && parent.name is "Plane1" or "Plane2")
-            {// 만약 부모가 존재하고 이름이 Plane1또는 Plane2라면
-                return parent;// 부모 반환
-            }
+            if (parent && parent.name is "Plane1" or "Plane2") return parent;// 만약 부모가 존재하고 이름이 Plane1또는 Plane2라면
             
-            if (hitTransform.name is "Plane1" or "Plane2")
-            {// 인자로 받은 트랜스폼이 Plane1 또는 Plane2 그 자체일 때
-                return hitTransform;
-            }
+            if (hitTransform.name is "Plane1" or "Plane2") return hitTransform; // 인자로 받은 트랜스폼이 Plane1 또는 Plane2 그 자체일 때
 
             return null;
         }
@@ -197,7 +211,7 @@ namespace Object
             {// rotationDuration만큼 회전 반복 실행
                 selectedObject.transform.rotation = Quaternion.Slerp(startRotation, endRotation, elapsed / rotationDuration);// 시작 회전에서 끝 회전까지 **부드럽게 보간(Spherical Linear Interpolation)**합니다.
                 elapsed += Time.deltaTime;// 매 프레임마다 경과 시간에 Time.deltaTime(프레임 간 시간 간격)을 누적
-                yield return null;// 현재 프레임을 마치고 다음 프레임까지 대기. 
+                yield return new WaitForSeconds(1);// 현재 프레임을 마치고 다음 프레임까지 대기. 
                 // 코루틴의 핵심: 이렇게 함으로써 while 루프가 한 프레임씩 실행되어 애니메이션처럼 동작
             }
 

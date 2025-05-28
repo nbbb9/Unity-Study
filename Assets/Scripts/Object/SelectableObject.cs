@@ -90,8 +90,10 @@ namespace Object
                     break;
             }
             
+            Debug.Log(" 333 ");
             if (onReselect != null)
             {// 
+                Debug.Log(" 444 ");
                 onReselect.Invoke(objectType, transform.position); // 이름 대신 타입 필드 사용
             }
 

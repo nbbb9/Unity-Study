@@ -503,10 +503,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectPlacementHandler: {fileID: 1007477027}
+  installWarningPopup: {fileID: 121104347}
   previewMaterial: {fileID: 2100000, guid: 436f38735e8bd5b4d9d1d86b6676bfe4, type: 2}
   infoPopup: {fileID: 1221880858}
   originalPosition: {x: 0, y: 0, z: 0}
-  installWarningPopup: {fileID: 121104347}
 --- !u!4 &258712057
 Transform:
   m_ObjectHideFlags: 0
@@ -776,9 +776,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 672bd9838e372674791cc977cbf91aa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoomAction: {fileID: 260992546485839714, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  panningAction: {fileID: 444520135682594387, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  rotateAction: {fileID: 7640722565995827518, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  panningAction:
+    m_Name: Panning
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 73258ac5-8ae4-4873-b16e-2683ed8311a2
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
+  rotateAction:
+    m_Name: Rotate
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 8e8f514a-2207-45b7-b9d6-5eab052b4657
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
+    m_Flags: 0
   rotationTarget: {fileID: 43516426}
 --- !u!1 &383119553
 GameObject:
@@ -1337,15 +1352,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 258712056}
-        m_TargetAssemblyTypeName: CreateObject, Assembly-CSharp
-        m_MethodName: SpawnCapsule
-        m_Mode: 1
+        m_TargetAssemblyTypeName: Object.ObjectCreateHandler, Assembly-CSharp
+        m_MethodName: SpawnObjects
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Capsule
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &563189033
@@ -3248,15 +3263,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 258712056}
-        m_TargetAssemblyTypeName: CreateObject, Assembly-CSharp
-        m_MethodName: SpawnSphere
-        m_Mode: 1
+        m_TargetAssemblyTypeName: Object.ObjectCreateHandler, Assembly-CSharp
+        m_MethodName: SpawnObjects
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Sphere
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1761185821
@@ -3789,15 +3804,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 258712056}
-        m_TargetAssemblyTypeName: CreateObject, Assembly-CSharp
-        m_MethodName: SpawnCylinder
-        m_Mode: 1
+        m_TargetAssemblyTypeName: Object.ObjectCreateHandler, Assembly-CSharp
+        m_MethodName: SpawnObjects
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Cylinder
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1871482998
@@ -3922,15 +3937,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 258712056}
-        m_TargetAssemblyTypeName: CreateObject, Assembly-CSharp
-        m_MethodName: SpawnCube
-        m_Mode: 1
+        m_TargetAssemblyTypeName: Object.ObjectCreateHandler, Assembly-CSharp
+        m_MethodName: SpawnObjects
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Cube
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1971380397

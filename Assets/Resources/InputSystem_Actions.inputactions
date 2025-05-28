@@ -20,16 +20,16 @@
                     "id": "263badcd-ea47-4a9e-9f21-742d7bcc015e",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "Press",
                     "initialStateCheck": true
                 },
                 {
                     "name": "Rotate",
                     "type": "Value",
                     "id": "f4b58227-7b7e-40c2-a099-71eaba1ac211",
-                    "expectedControlType": "Vector3",
+                    "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "Press",
                     "initialStateCheck": true
                 }
             ],
