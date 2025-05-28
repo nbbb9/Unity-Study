@@ -2,30 +2,114 @@
     "name": "InputSystem_Actions",
     "maps": [
         {
-            "name": "Mouse",
-            "id": "3836b785-4076-4a4a-b26f-bc8348439954",
+            "name": "Camera",
+            "id": "d594802f-ba61-4c5c-b7dd-b346f8697353",
             "actions": [
                 {
-                    "name": "a",
-                    "type": "Button",
-                    "id": "0cd8d448-1bbd-407d-b925-177dc390459b",
-                    "expectedControlType": "",
+                    "name": "Zoom",
+                    "type": "Value",
+                    "id": "c89f8d4a-4cf9-49aa-9190-724a24d14ed5",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Panning",
+                    "type": "Value",
+                    "id": "263badcd-ea47-4a9e-9f21-742d7bcc015e",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotate",
+                    "type": "Value",
+                    "id": "f4b58227-7b7e-40c2-a099-71eaba1ac211",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "3a358342-026d-4ec3-b972-82204c63835a",
-                    "path": "<Keyboard>/a",
-                    "interactions": "Hold",
+                    "id": "8b594ce7-db77-45ef-9aa1-68d61c866c3d",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "a",
+                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "39e8288f-3d66-4962-912b-fbab77212211",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Panning",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "69380202-434c-414e-9489-e8cfb83ff4d2",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Panning",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "2016ca0b-69bd-4787-96c3-7546bea609a4",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Panning",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "8a444f66-ff6c-4d59-b8bc-f5fc378548f1",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "818cb907-ae32-41fe-ab7e-2143cb09fdeb",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "b3f85508-a401-4956-be69-031779bc252f",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         }

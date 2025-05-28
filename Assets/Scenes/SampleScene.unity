@@ -776,11 +776,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 672bd9838e372674791cc977cbf91aa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoomSpeed: 100
-  minZoom: 3
-  maxZoom: 15
-  panSpeed: 5
-  rotateSpeed: 20
+  zoomAction: {fileID: 260992546485839714, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  panningAction: {fileID: 444520135682594387, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  rotateAction: {fileID: 7640722565995827518, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   rotationTarget: {fileID: 43516426}
 --- !u!1 &383119553
 GameObject:
@@ -2524,6 +2522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cafe398a1a4e4f0d94c8b41e2ed78820, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rotationDuration: 0.3
 --- !u!4 &1007477028
 Transform:
   m_ObjectHideFlags: 0
