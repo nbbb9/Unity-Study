@@ -9,8 +9,8 @@ namespace Ui
         
         private InputActionAsset inputAsset;
         private InputAction zoomAction;
-        public InputAction panningAction;
-        public InputAction rotateAction;
+        private InputAction panningAction;
+        private InputAction rotateAction;
         
         private float zoomSpeed = 100f;// 줌 속도(휠 감도)
         private float minZoom = 3f;// 최소 줌 크기
@@ -28,8 +28,8 @@ namespace Ui
         private void Awake()
         {
             cam = GetComponent<Camera>();
-            // InputActionAsset 불러오기
-            inputAsset = Resources.Load<InputActionAsset>("InputSystem_Actions");
+            
+            inputAsset = Resources.Load<InputActionAsset>("InputSystem_Actions");// InputActionAsset 불러오기
             
             if (!inputAsset)
             {
@@ -40,29 +40,33 @@ namespace Ui
             panningAction = inputAsset.FindAction("Camera/Panning");
             rotateAction = inputAsset.FindAction("Camera/Rotate");
         }
-
-        private void Start()
-        {   
-            cam = GetComponent<Camera>();
-            initialPosition = cam.transform.position;// 카메라 초기 위치
-            initialRotation = cam.transform.rotation;// 카메라 초기 회전
-            initialSize = cam.orthographicSize;// 카메라 초기 줌
-            // 이벤트 연결
-            zoomAction.performed += OnZoom;
-            panningAction.performed += OnPanning;
-            rotateAction.performed += OnRotate;
-
-            // panningAction.canceled += ctx => StopPanning();
-            // rotateAction.canceled += ctx => StopRotate();
-        }
         
         private void OnEnable()
-        {// 액션들 활성화??
+        {// 
             inputAsset?.Enable();
         }
 
+        private void Start()
+        {
+            initialPosition = cam.transform.position;// 카메라 초기 위치
+            initialRotation = cam.transform.rotation;// 카메라 초기 회전
+            initialSize = cam.orthographicSize;// 카메라 초기 줌
+            // Unity Input System에서 입력 액션이 발생했을 때, 그에 대응하는 메서드를 실행하도록 이벤트를 연결
+            zoomAction.performed += OnZoom;// Zoom 입력 액션이 실행(Performed)되었을 때, OnZoom메서드를 호출
+            panningAction.performed += OnPanning;// Panning 입력 액션이 실행(Performed)되었을 때, OnPanning메서드를 호출
+            rotateAction.performed += OnRotate;// Rotate 입력 액션이 실행(Performed)되었을 때, OnRotate메서드를 호출
+            // canceled는 입력이 해제되었을 때 발생 시점을 바라본다. 여기선 메서드들이 이벤트 안에서 즉시 한 번만 처리되므로 canceled는 불필요하다.
+            // panningAction.canceled += ctx => StopPanning();
+            // rotateAction.canceled += ctx => StopRotate();
+        }
+
         private void OnDisable()
-        { // 액션들 비활성화??
+        { /** 해당 코드가 필요한 이유
+            * 1. 오브젝트가 비활성화될 때 입력 이벤트도 중지되어야 함. Unity에서는 MonoBehaviour가 꺼지거나 씬에서 제거될 때 OnDisable()이 자동 호출.
+            * 이때 입력을 받는 상태로 계속 두면, 이미 꺼진 오브젝트에 이벤트가 계속 전달될 수 있어 문제가 발생.
+            * 2. 메모리 누수 및 이벤트 중복 방지
+            * 3. 컴포넌트 생명주기에 맞는 적절한 Input 처리
+            */
             inputAsset?.Disable();
         }
         
@@ -71,7 +75,7 @@ namespace Ui
         {
             float scroll = context.ReadValue<float>();// zoomAction값을 읽어들임. 위로 굴리면 +, 아래로 굴리면 -
             if (Mathf.Approximately(scroll, 0f))
-            {
+            {// scroll과 0f가 같은지(근사한지) 비교. 부동 소수점은 사람이 인식하기에는 같은 값일 수 있으나, ==의 결과가 false가 나올 수 있어 근사치로 비교.
                 return;
             }
             cam.orthographicSize -= scroll * zoomSpeed * Time.deltaTime;// 카메라의 확대/축소 정도. Time.deltaTime을 곱함으로서 프레임 속도에 상관없이 일정한 속도로 움직임.
@@ -83,7 +87,7 @@ namespace Ui
         {
             Vector2 delta = context.ReadValue<Vector2>();// panningAction의 값을 읽어들임.
             if (delta == Vector2.zero)
-            {
+            {// 입력값이 0이면(사용자가 움직이지 않았다면)
                 return;
             }
             Vector3 move = new Vector3(-delta.x * panSpeed, -delta.y * panSpeed, 0);// 사실상 평면 이동이므로 x축 y축만 계산. Vector3를 사용해야 하는 이유는 transform.Translate()이 인자로 Vector3를 받음
