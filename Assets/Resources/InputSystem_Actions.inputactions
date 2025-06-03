@@ -114,13 +114,58 @@
             ]
         },
         {
-            "name": "New action map",
+            "name": "Object",
             "id": "def26393-a44f-4ca6-82bb-18c881019bc9",
             "actions": [
                 {
-                    "name": "New action",
-                    "type": "Button",
+                    "name": "MoveBeforeFix",
+                    "type": "Value",
                     "id": "f1fd7106-cf5c-4252-a423-97b286175603",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Fix",
+                    "type": "Button",
+                    "id": "47c6a474-6913-4157-b857-ddc2c7a132ef",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Select",
+                    "type": "Button",
+                    "id": "87075adf-ab32-49d0-9770-1411d97b66ff",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Rotate",
+                    "type": "Button",
+                    "id": "84734094-06ce-4fe1-8e33-9151e4e88133",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Drag",
+                    "type": "Button",
+                    "id": "5fb3ced3-c9f4-4bb6-bfb2-6615b002ea3d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hover",
+                    "type": "Button",
+                    "id": "6284e24f-3ca3-4aac-bada-3a53862e1d6d",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -131,11 +176,66 @@
                 {
                     "name": "",
                     "id": "a79ab5e0-c416-40f2-90d9-7aa55b05f347",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveBeforeFix",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "08a94cf2-c2f7-4ede-a032-4e8501d660e7",
                     "path": "",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Fix",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "58e9f622-91c9-4432-9259-f3fad748174a",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "48bfea63-324e-44f1-90ba-e7baccf5358e",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "77432dc7-4cc5-4d42-aa28-97faa11c3e11",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drag",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "69b4fbf1-9b5d-4db2-af2a-8fe1e7c96302",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hover",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

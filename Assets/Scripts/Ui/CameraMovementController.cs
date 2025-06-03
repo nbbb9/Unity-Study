@@ -7,7 +7,7 @@ namespace Ui
     {
         private Camera cam;// 카메라 컴포넌트를 저장할 변수
         
-        private InputActionAsset inputAsset;
+        private InputActionAsset cameraInputAsset;
         private InputAction zoomAction;
         private InputAction panningAction;
         private InputAction rotateAction;
@@ -29,21 +29,21 @@ namespace Ui
         {
             cam = GetComponent<Camera>();
             
-            inputAsset = Resources.Load<InputActionAsset>("InputSystem_Actions");// InputActionAsset 불러오기
+            cameraInputAsset = Resources.Load<InputActionAsset>("InputSystem_Actions");// InputActionAsset 불러오기
             
-            if (!inputAsset)
+            if (!cameraInputAsset)
             {
                 return;
             }
             // 이름으로 InputAction 찾기 (Input Map 이름이 "Camera", Action 이름이 "Zoom" 등일 경우)
-            zoomAction = inputAsset.FindAction("Camera/Zoom");
-            panningAction = inputAsset.FindAction("Camera/Panning");
-            rotateAction = inputAsset.FindAction("Camera/Rotate");
+            zoomAction = cameraInputAsset.FindAction("Camera/Zoom");
+            panningAction = cameraInputAsset.FindAction("Camera/Panning");
+            rotateAction = cameraInputAsset.FindAction("Camera/Rotate");
         }
         
         private void OnEnable()
         {// 
-            inputAsset?.Enable();
+            cameraInputAsset?.Enable();
         }
 
         private void Start()
@@ -67,7 +67,7 @@ namespace Ui
             * 2. 메모리 누수 및 이벤트 중복 방지
             * 3. 컴포넌트 생명주기에 맞는 적절한 Input 처리
             */
-            inputAsset?.Disable();
+            cameraInputAsset?.Disable();
         }
         
         // Zoom 이벤트 핸들러

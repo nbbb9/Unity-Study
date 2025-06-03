@@ -9,13 +9,13 @@ namespace Object
     {
         private Renderer rend;
         
-        public Action<PrimitiveType, Vector3> onReselect;// ??????????????
+        public Action<String, Vector3> onReselect;// ??????????????
         
-        public PrimitiveType objectType;// 현재 오브젝트의 타입
+        public String objectType;// 현재 오브젝트의 타입
         
         public GameObject infoPopup;// 선택한 ObjectPopup
-        public TextMeshProUGUI nameText;// O*N 아래 Text
-        public TextMeshProUGUI typeText;// O*T 아래 Text
+        private TextMeshProUGUI nameText;// O*N 아래 Text
+        private TextMeshProUGUI typeText;// O*T 아래 Text
         
         public SelectMode selectMode;// 오브젝트 선택 모드 초기값
         
